@@ -36,5 +36,10 @@ public class MainDisplayView {
    public void closeMenuAction(ActionEvent event) { //Closes the program if the exit option is selected from the menu.
       controller.closeProgram();
    }
+   
+   @FXML
+   public void openExportFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
+      controller.openExportFile();
+   }
 
 }

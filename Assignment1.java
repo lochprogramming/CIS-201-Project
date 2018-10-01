@@ -30,11 +30,9 @@ public class Assignment1 extends Application {
          
          
          FXMLLoader mainDisplayLoader = new FXMLLoader(getClass().getResource("MainDisplayView.fxml"));
-         System.out.println("Check");
          // Sets up the scene from the MainDisplayView for when program initially starts
          Scene scene = new Scene(mainDisplayLoader.load()); // 
-         System.out.println("Check");
-         primaryStage.setTitle("Finance Program"); //Set the title for our program window
+         primaryStage.setTitle("Anki Vocabulary Extractor"); //Set the title for our program window
          primaryStage.setScene(scene); //Display SplashScreen window, using the scene graph
          //primaryStage.setMaximized(true);
          primaryStage.show();
@@ -46,7 +44,8 @@ public class Assignment1 extends Application {
          MainDisplayController controller = new MainDisplayController(view, dictionary); // creates a new instance of the 
                                                                                          // controller passing it the 
                                                                                          // view and dictionary
-         
+                                                                                         
+         controller.setPrimaryStage(primaryStage);//pass the stage reference to the mainController
 
          
          
