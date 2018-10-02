@@ -1,3 +1,12 @@
+// **********************************************************************************
+// Title: Major Project: DictionaryFile Class
+// Author: Matthew Lochman
+// Course Section: CIS201-HYB2 (Seidel) Fall 2018
+// File: DictionaryFile.java
+// Description: Class that basically creates an observable File object.
+//              Will eventually be used to monitor closing without saving events.
+// **********************************************************************************
+
 import javafx.beans.property.SimpleBooleanProperty;
 import java.io.File;
 

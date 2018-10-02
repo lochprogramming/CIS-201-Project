@@ -1,3 +1,12 @@
+// **********************************************************************************
+// Title: Major Project: Vocabulary Class
+// Author: Matthew Lochman
+// Course Section: CIS201-HYB2 (Seidel) Fall 2018
+// File: Vocabulary.java
+// Description: Class for the Vocabulary object. 
+//              Contains attributes for word, part of speech, and definition
+// **********************************************************************************
+
 public class Vocabulary {
    // class for the vocabulary data structure
    
@@ -42,6 +51,7 @@ public class Vocabulary {
    }
    
    public String toString() {
+      // returns a string formatted as "word - (part of speech) definition"
       return word + " - (" + partOfSpeech + ") " + definition;
    }
 }

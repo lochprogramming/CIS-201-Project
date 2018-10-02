@@ -1,3 +1,11 @@
+// **********************************************************************************
+// Title: Major Project: Entry Class
+// Author: Matthew Lochman
+// Course Section: CIS201-HYB2 (Seidel) Fall 2018
+// File: Entry.java
+// Description: A subclass of the Vocabulary class which includes an example sentence.
+// **********************************************************************************
+
 public class Entry extends Vocabulary {
    // class extends the Vocabulary class by adding in  
    // an example sentence using the word.

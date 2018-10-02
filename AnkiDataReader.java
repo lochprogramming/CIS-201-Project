@@ -1,3 +1,16 @@
+// **********************************************************************************
+// Title: Major Project: AnkiDataReader
+// Author: Matthew Lochman
+// Course Section: CIS201-HYB2 (Seidel) Fall 2018
+// File: AnkiDataReader.java
+// Description: Class that reads in vocabulary data from a Anki export file which uses
+//              the subs2srs template
+// **********************************************************************************
+
+// Still needs a quality assurance pass to ensure that if it encounters cards that aren't
+// formatted correctly it doesn't crash.  I've not tested it with cards that aren't in
+// the correct format.
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -44,6 +57,12 @@ public class AnkiDataReader {
             ArrayList<Vocabulary> vocab = extractVocab(s); // calls function to extract an arraylist of Vocabulary from the card
             ArrayList<Entry> entries = createEntries(vocab, expression); // calls function to create Entry objects from the Vocabulary
             addEntriesToList(entries); // calls function that adds the entries to the ObservableList
+            
+            
+            // Currently prints the extracted data for confirmation purposes
+            // Still needs to update the data model
+            // Will return the entries to the controller to handle.
+            // Need to update the return type for this method at that time.
          }
       } catch (Exception e) {
          System.out.println(e);
@@ -136,6 +155,10 @@ public class AnkiDataReader {
       
       int wordEnd = line.indexOf(VOCAB_SEPARATOR);
       String word = "", partOfSpeech = "", definition = "";
+      
+      // strips aparts text lines in the following formats:
+      // word - (part of speech) definition
+      // word - definition
       
       try {
          word = line.substring(0, wordEnd);

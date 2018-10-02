@@ -1,3 +1,11 @@
+// **********************************************************************************
+// Title: Major Project: Assignment1 Main File
+// Author: Matthew Lochman
+// Course Section: CIS201-HYB2 (Seidel) Fall 2018
+// File: Assignment1.java
+// Description: Class containing the main method for the project.
+// **********************************************************************************
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
@@ -52,7 +60,7 @@ public class Assignment1 extends Application {
          //Set up a handler to deal with someone trying to close the window from non-menu means.
          primaryStage.setOnCloseRequest(event -> {
             System.out.println("Stage is closing");
-            controller.closeProgram();
+            controller.closeWindow(primaryStage);
             event.consume();
          });
          
