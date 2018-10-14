@@ -3,14 +3,20 @@
 // Author: Matthew Lochman
 // Course Section: CIS201-HYB2 (Seidel) Fall 2018
 // File: MainDisplayView.java
-// Description: Class which monitors the program view what interacts with the user.
-//              Anytime the user interacts with the view, calls the appropriate controller method
-//              Updates the view in response to calls from the controller.
+// Description: The view class manages the GUI that the user sees.
+//              User requests and input are passed to the controller to distribute.
+//              The view needs to interact with the controller to pass events like
+//                 button clicks and menu actions.        
 // **********************************************************************************
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 import javafx.event.ActionEvent;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.Label;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.collections.ObservableList;
+import javafx.scene.control.ProgressBar;
 
 public class MainDisplayView {
    // the class that makes up the display view
@@ -18,7 +24,22 @@ public class MainDisplayView {
    private MainDisplayController controller;
    
    @FXML
-   private TableView<Vocabulary> vocabTable;
+   private TableView<Entry> vocabTable;
+   
+   @FXML
+   private TableColumn<Entry, String> wordColumn;
+
+   @FXML
+   private TableColumn<Entry, String> partOfSpeechColumn;
+
+   @FXML
+   private TableColumn<Entry, String> definitionColumn;
+   
+   @FXML
+   private Label wordCountLabel;
+
+   @FXML
+   private ProgressBar progressBar;
    
    public MainDisplayView() {
       // default constructor
@@ -57,5 +78,34 @@ public class MainDisplayView {
    @FXML
    public void aboutHelpMenuAction(ActionEvent event) { // triggers the opening of the about dialog from the help menu
       controller.openAboutDialog();
+   }
+   
+   @FXML
+   public void saveMenuAction(ActionEvent event) { // triggers the save feature of the file menu
+      controller.saveDictionaryFile();
+   }
+   
+   @FXML
+   public void saveAsMenuAction(ActionEvent event) { // triggers the save as feature of the file menu
+      controller.saveAsDictionaryFile();
+   }
+   
+   public void setTable(ObservableList<Entry> vocabList) {
+      // method which sets the passed entry list to be displayed in the vocab table.
+      vocabTable.setItems(vocabList);
+   }
+   
+   public void setWordCount(int count) {
+      wordCountLabel.setText(Integer.toString(count));
+   }
+   
+   public void initialize() {
+      setDefaultColumnSize(); // links the columns to the window width so they stay in the same proportion when the window is resized.
+      wordCountLabel.setText("");
+      
+      // initialize the cell factories that will extract the appropriate attributes for each column in the vocabulary table
+      wordColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("word"));
+      partOfSpeechColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("partOfSpeech"));
+      definitionColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("definition"));
    }
 }

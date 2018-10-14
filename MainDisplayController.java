@@ -3,11 +3,9 @@
 // Author: Matthew Lochman
 // Course Section: CIS201-HYB2 (Seidel) Fall 2018
 // File: MainDisplayController.java
-// Description: Controller class which controls the program.  
-//              Handles all interaction between the program views and the data model.
-//              Anytime the user interacts with the program, the controller calls
-//              the appropriate method, and when necessary updates the data model
-//              and the view.
+// Description: The controller processes user requests. 
+//              Based on the user request, the controller calls methods in the view
+//              and model to accomplish the requested action.
 // **********************************************************************************
 
 import javafx.application.Platform;
@@ -17,6 +15,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import java.io.IOException;
 import javafx.stage.Modality;
+import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 
 public class MainDisplayController {
    // controller for the main program
@@ -30,11 +30,37 @@ public class MainDisplayController {
       this.view = view;
       this.model = model;
       view.setController(this);
-      System.out.println();
+      view.setTable(model.getDictionaryEntries());
+      
+      //Add a Listener to the model's data list that checks to see if it has been changed.
+      //If so, it will update the word count in the display.
+      //This listener will be the way the view updates the information displayed to the user.
+      model.addListener(new ListChangeListener<Entry>() {
+         @Override
+         public void onChanged(Change<? extends Entry> c) {
+            view.setWordCount(model.getDictionarySize());
+         }
+      });
    }
    
    public void setPrimaryStage(Stage stage) {
       this.primaryStage = stage;
+   }
+   
+   public void setModel(DictionaryModel model) {
+      this.model = model;
+   }
+   
+   public void setView(MainDisplayView view) {
+      this.view = view;
+   }
+   
+   public DictionaryModel getModel() {
+      return model;
+   }
+   
+   public MainDisplayView getView() {
+      return view;
    }
    
    public Stage getPrimaryStage() {
@@ -47,14 +73,27 @@ public class MainDisplayController {
       
       // File will eventually be chosen by user.  Currently auto loading 
       // an Anki export file to save time testing the program.
-      File file = new File("Flying Witch__Flying Witch Episode 1.txt");
+      //File file = new File("Flying Witch__Flying Witch Episode 1.txt");
+      File file = new File("Subs2srs Cards.txt");
       if (file != null) {
          System.out.println("File chosen successfully.");
          AnkiDataReader ankiDataReader = new AnkiDataReader(this, file);
-         ankiDataReader.readData();
+         addEntryToModel(ankiDataReader.readData()); // calls controller method to add entries to the data model
+         
       } else 
          System.out.println("File not chosen successfully.");
    }
+   
+   public void addEntryToModel(Entry e) {
+      // overloaded method to add single entry to data model
+      model.addEntry(e);
+   }
+   
+   public void addEntryToModel(ObservableList<Entry> entries) {
+      // overloaded method to add multiple entries to data model
+      model.addEntry(entries);
+   }
+   
    
    public void openDictionaryFile() {
       // Allows the user to choose a previously saved dictionary file.
@@ -70,7 +109,7 @@ public class MainDisplayController {
          System.out.println("File not chosen successfully.");
    }
    
-   public void saveDictionaryFile() {
+   public void saveAsDictionaryFile() {
       // Allows the user to create a csv file to save the data in the current model.
       // Actual file writing not currently implemented.
       
@@ -78,6 +117,17 @@ public class MainDisplayController {
       DictionaryFile file = fileDialog.saveDictionaryFile();
       //add some commands for file writing.
       //create new DictionaryWriter class.
+   }
+   
+   public void saveDictionaryFile() {
+      // Allows the user to create a csv file to save the data in the current model.
+      // Actual file writing not currently implemented.
+      
+      if (model.getCurrentFile() == null)
+         saveAsDictionaryFile();
+      
+         //add some commands for file writing.
+         //create new DictionaryWriter class.
    }
    
    public void openAboutDialog() {
@@ -102,7 +152,6 @@ public class MainDisplayController {
          e.printStackTrace();
          System.out.println("Error Loading about dialog");
       }
-      
    }
    
    public void closeWindow(Stage stage) {
