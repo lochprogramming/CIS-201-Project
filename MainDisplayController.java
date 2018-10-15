@@ -17,6 +17,9 @@ import java.io.IOException;
 import javafx.stage.Modality;
 import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener;
+import javafx.beans.property.DoubleProperty;
+import javafx.event.EventHandler;
+import javafx.concurrent.WorkerStateEvent;
 
 public class MainDisplayController {
    // controller for the main program
@@ -67,6 +70,14 @@ public class MainDisplayController {
       return this.primaryStage;
    }
    
+   public void bindProgress(DoubleProperty d) {
+      view.bindProgressBar(d);
+   }
+   
+   public void unbindProgress() {
+      view.unbindProgressBar();
+   }
+   
    public void openExportFile() {
       //FileDialog fileDialog = new FileDialog(this);
       //File file = fileDialog.openExportFile();
@@ -77,8 +88,27 @@ public class MainDisplayController {
       File file = new File("Subs2srs Cards.txt");
       if (file != null) {
          System.out.println("File chosen successfully.");
-         AnkiDataReader ankiDataReader = new AnkiDataReader(this, file);
-         addEntryToModel(ankiDataReader.readData()); // calls controller method to add entries to the data model
+         
+         //create a data reader task
+         AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(file);
+         bindProgress((DoubleProperty) ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
+         
+         // Add an event handler that triggers when the task completes.
+         ankiDataReaderTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+             new EventHandler<WorkerStateEvent>() {
+             @Override
+             public void handle(WorkerStateEvent t) {
+                 addEntryToModel(ankiDataReaderTask.getValue()); // adds entries to model
+                 unbindProgress(); // unbinds the progress property now that the task has completed
+             }
+         });
+         try {
+            Thread th = new Thread(ankiDataReaderTask); // creates a new background thread to run the task on
+            th.setDaemon(true);
+            th.start();
+         } catch (Exception e) {
+            System.out.println(e);
+         }
          
       } else 
          System.out.println("File not chosen successfully.");
@@ -178,6 +208,7 @@ public class MainDisplayController {
       if (okToDoAction)
          Platform.exit();
       */
+     
       if (stage == getPrimaryStage())
          Platform.exit(); // closes the main program view and closes the program thread
       else

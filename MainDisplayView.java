@@ -17,12 +17,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
+import javafx.beans.property.DoubleProperty;
 
 public class MainDisplayView {
    // the class that makes up the display view
    
    private MainDisplayController controller;
-   
+      
    @FXML
    private TableView<Entry> vocabTable;
    
@@ -51,6 +52,15 @@ public class MainDisplayView {
    
    public MainDisplayController getController() {
       return controller;
+   }
+   
+   public void bindProgressBar(DoubleProperty d) {
+      progressBar.progressProperty().bind(d);
+   }
+   
+   public void unbindProgressBar() {
+      progressBar.progressProperty().unbind();
+      progressBar.progressProperty().set(0.0);
    }
    
    private void setDefaultColumnSize() {

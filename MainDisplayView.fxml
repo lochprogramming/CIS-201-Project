@@ -55,7 +55,7 @@
                <children>
                   <Label prefHeight="25.0" prefWidth="103.0" text="   Word Count: " HBox.hgrow="ALWAYS" />
                   <Label fx:id="wordCountLabel" prefHeight="25.0" prefWidth="340.0" />
-                  <ProgressBar fx:id="progressBar" prefHeight="40.0" prefWidth="159.0" progress="0.0" visible="false" />
+                  <ProgressBar fx:id="progressBar" prefHeight="40.0" prefWidth="159.0" progress="0.0" visible="true" />
                </children>
             </HBox>
          </bottom>
