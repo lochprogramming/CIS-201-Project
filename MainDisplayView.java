@@ -17,7 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
-import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 
 public class MainDisplayView {
    // the class that makes up the display view
@@ -54,7 +54,7 @@ public class MainDisplayView {
       return controller;
    }
    
-   public void bindProgressBar(DoubleProperty d) {
+   public void bindProgressBar(ReadOnlyDoubleProperty d) {
       progressBar.progressProperty().bind(d);
    }
    

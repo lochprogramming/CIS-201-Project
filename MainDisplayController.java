@@ -17,7 +17,7 @@ import java.io.IOException;
 import javafx.stage.Modality;
 import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener;
-import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.concurrent.WorkerStateEvent;
 
@@ -70,7 +70,7 @@ public class MainDisplayController {
       return this.primaryStage;
    }
    
-   public void bindProgress(DoubleProperty d) {
+   public void bindProgress(ReadOnlyDoubleProperty d) {
       view.bindProgressBar(d);
    }
    
@@ -91,7 +91,8 @@ public class MainDisplayController {
          
          //create a data reader task
          AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(file);
-         bindProgress((DoubleProperty) ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
+         //bindProgress((DoubleProperty) ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
+         bindProgress(ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          
          // Add an event handler that triggers when the task completes.
          ankiDataReaderTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,

@@ -128,9 +128,21 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
             System.out.println(notesContent);
          }
          
+         String[][] vocabStrings = splitLines(lines);
+         
+         for (int i = 0; i < vocabStrings.length; i++) 
+            if (vocabStrings[i][0].length() != 0)
+               vocab.add(new Vocabulary(vocabStrings[i][0], vocabStrings[i][1], vocabStrings[i][2]));
+         /*
+         // old lines for calling the convertToVocabulary method
+         // originally, the programmed created Vocabulary one entry at a time
+         // replaced to force inclusion of 2D arrays
+         // this solution was more elegant in my opinion (and required less memory)
          for (int i = 0; i < lines.length; i++) 
             if (lines[i].length() != 0) 
                vocab.add(convertToVocabulary(lines[i]));
+         */      
+         
       }
       
       return vocab;
@@ -207,6 +219,66 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       return s;
    }
    
+   private String[][] splitLines(String[] lines) {
+      // helper method that takes the lines of text containing vocab information for a single word
+      // and splits them into their three parts: word, part of speech, and definition.
+      // information stored in a 2D String array.
+      
+      // set up the local variables we'll need.
+      int size = lines.length;
+      int parts = 3;
+      String[][] vocabStrings = new String[size][parts];
+      
+      // initialize the 2D String array
+      for (int i = 0; i < size; i++)
+         for (int j = 0; j < parts; j++)
+            vocabStrings[i][j] = "";
+      
+      // Loop through each of the lines and strip it apart
+      // Strips aparts text lines in the following formats:
+      // word - (part of speech) definition
+      // word - definition
+      for (int i = 0; i < size; i++) {
+         if (lines[i].length() != 0) {
+            int wordEnd = lines[i].indexOf(VOCAB_SEPARATOR); // find the separator string " - " that 
+                                                             // separates the words from the rest of the entry
+            int posStart = lines[i].indexOf(VOCAB_SEPARATOR + "("); // find the start of the part of speech
+            
+            try {
+               if (wordEnd != -1) { // there was a separator
+                  vocabStrings[i][0] = lines[i].substring(0, wordEnd);
+                  if (posStart != -1) { // there was a part of speech included
+                     int defStart = lines[i].indexOf(")", posStart); // find the start of the definition
+                     
+                     if (defStart != 1) { // checking to make sure the ) was present.  If not, then there is an error in the formatting.
+                        vocabStrings[i][1] = lines[i].substring(posStart + (VOCAB_SEPARATOR + "(").length(), defStart);
+                        vocabStrings[i][2] = lines[i].substring(defStart + 1);
+                     } else {
+                        System.out.println("Error in splitLines");
+                        System.out.println("No ending ) with part of speech detected");
+                        System.out.println(lines[i]);
+                     }
+                  } else // there was no part of speech, so the rest is just the definition
+                     vocabStrings[i][2] = lines[i].substring(wordEnd + VOCAB_SEPARATOR.length());
+               } else // this case triggers if the line was only the vocab word. This should never happen in practice
+                  vocabStrings[i][0] = lines[i];
+                  
+            } catch (Exception e) {
+               System.out.println("Error in splitLines");
+               System.out.println("Error in formatting detected.");
+               System.out.println(e);
+               System.out.println(lines[i]);
+            }
+         }
+      }
+      
+      return vocabStrings;
+   }
+   
+   /*
+   // original methods that are a little more elegant in my opinion.
+   // deactivated to force to use of multi-dimensional arrays
+   
    private Vocabulary convertToVocabulary(String line) {
       // helper function that takes a line of text containing vocab information for a single word
       // and converts it into a new Vocabulary object.
@@ -239,6 +311,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
          word = line;
       return new Vocabulary(word.trim(), partOfSpeech.trim(), definition.trim());
    }
+   */
    
    private ArrayList<Entry> createEntries(ArrayList<Vocabulary> vocab, String expression) {
       // helper function that creates Entry objects from each of the elements of a Vocabulary list.
