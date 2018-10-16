@@ -128,16 +128,21 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
             System.out.println(notesContent);
          }
          
-         String[][] vocabStrings = splitLines(lines);
          
+         String[][] vocabStrings = splitLines(lines); // split the lines into word, part of speech, definition
+                                                      // and store result in an array
+         
+         
+         // loop through the array and create new vocabulary from all the non-empty entries
          for (int i = 0; i < vocabStrings.length; i++) 
             if (vocabStrings[i][0].length() != 0)
                vocab.add(new Vocabulary(vocabStrings[i][0], vocabStrings[i][1], vocabStrings[i][2]));
+               
          /*
          // old lines for calling the convertToVocabulary method
          // originally, the programmed created Vocabulary one entry at a time
          // replaced to force inclusion of 2D arrays
-         // this solution was more elegant in my opinion (and required less memory)
+         // I haven't tested which method is more efficient, but I feel like this one is better
          for (int i = 0; i < lines.length; i++) 
             if (lines[i].length() != 0) 
                vocab.add(convertToVocabulary(lines[i]));
@@ -246,22 +251,22 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
             
             try {
                if (wordEnd != -1) { // there was a separator
-                  vocabStrings[i][0] = lines[i].substring(0, wordEnd);
+                  vocabStrings[i][0] = lines[i].substring(0, wordEnd).trim();
                   if (posStart != -1) { // there was a part of speech included
                      int defStart = lines[i].indexOf(")", posStart); // find the start of the definition
                      
                      if (defStart != 1) { // checking to make sure the ) was present.  If not, then there is an error in the formatting.
-                        vocabStrings[i][1] = lines[i].substring(posStart + (VOCAB_SEPARATOR + "(").length(), defStart);
-                        vocabStrings[i][2] = lines[i].substring(defStart + 1);
+                        vocabStrings[i][1] = lines[i].substring(posStart + (VOCAB_SEPARATOR + "(").length(), defStart).trim();
+                        vocabStrings[i][2] = lines[i].substring(defStart + 1).trim();
                      } else {
                         System.out.println("Error in splitLines");
                         System.out.println("No ending ) with part of speech detected");
                         System.out.println(lines[i]);
                      }
                   } else // there was no part of speech, so the rest is just the definition
-                     vocabStrings[i][2] = lines[i].substring(wordEnd + VOCAB_SEPARATOR.length());
+                     vocabStrings[i][2] = lines[i].substring(wordEnd + VOCAB_SEPARATOR.length()).trim();
                } else // this case triggers if the line was only the vocab word. This should never happen in practice
-                  vocabStrings[i][0] = lines[i];
+                  vocabStrings[i][0] = lines[i].trim();
                   
             } catch (Exception e) {
                System.out.println("Error in splitLines");
@@ -275,41 +280,49 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       return vocabStrings;
    }
    
-   /*
+   
    // original methods that are a little more elegant in my opinion.
    // deactivated to force to use of multi-dimensional arrays
-   
+   /*
    private Vocabulary convertToVocabulary(String line) {
       // helper function that takes a line of text containing vocab information for a single word
       // and converts it into a new Vocabulary object.
-      
-      int wordEnd = line.indexOf(VOCAB_SEPARATOR);
+     
       String word = "", partOfSpeech = "", definition = "";
       // strips aparts text lines in the following formats:
       // word - (part of speech) definition
       // word - definition
       
-      if (wordEnd != -1) {
-         try {
+      int wordEnd = line.indexOf(VOCAB_SEPARATOR); // find the separator string " - " that 
+                                                   // separates the words from the rest of the entry
+      try {                                             
+         if (wordEnd != -1) { // there was a word separator
             word = line.substring(0, wordEnd);
-            line = line.substring(wordEnd);
+            int posStart = line.indexOf(VOCAB_SEPARATOR + "("); // find the start of the part of speech
             
-            if (line.indexOf(VOCAB_SEPARATOR + "(") != -1) {
-               partOfSpeech = line.substring((VOCAB_SEPARATOR + "(").length(), line.indexOf(")"));
-               line = line.substring(line.indexOf(")") + 1);
-            } else
-               line = line.substring(line.indexOf(VOCAB_SEPARATOR) + VOCAB_SEPARATOR.length());
+            if (posStart != -1) { // there was a part of speech included
+               int defStart = line.indexOf(")", posStart); // find the start of the definition
+                     
+               if (defStart != 1) { // checking to make sure the ) was present.  If not, then there is an error in the formatting.
+                  partOfSpeech = line.substring(posStart + (VOCAB_SEPARATOR + "(").length(), defStart).trim();
+                  definition = line.substring(defStart + 1).trim();
+               } else {
+                  System.out.println("Error in splitLines");
+                  System.out.println("No ending ) with part of speech detected");
+                  System.out.println(line);
+               }
+            } else // there was no part of speech, so the rest is just the definition
+               definition = line.substring(wordEnd + VOCAB_SEPARATOR.length()).trim();
+         } else // this case triggers if the line was only the vocab word. This should never happen in practice
+            word = line.trim();
             
-            definition = line;
-            
-         } catch (Exception e) {
-            System.out.println("Error in convertToVocabulary");
-            System.out.println(e);
-            System.out.println(line);
-         }
-      } else
-         word = line;
-      return new Vocabulary(word.trim(), partOfSpeech.trim(), definition.trim());
+      } catch (Exception e) {
+         System.out.println("Error in convertToVocabulary");
+         System.out.println(e);
+         System.out.println(line);
+      }
+
+      return new Vocabulary(word, partOfSpeech, definition);
    }
    */
    
