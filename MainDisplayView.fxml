@@ -20,7 +20,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                         <MenuItem mnemonicParsing="false" onAction="#openExportFileMenuAction" text="Import Anki Data" />
-                        <MenuItem mnemonicParsing="false" text="Open Dictionary File" />
+                        <MenuItem mnemonicParsing="false" onAction="#openDictionaryFileMenuAction" text="Open Dictionary File" />
                         <MenuItem mnemonicParsing="false" onAction="#saveMenuAction" text="Save Dictionary File" />
                         <MenuItem mnemonicParsing="false" onAction="#saveAsMenuAction" text="Save Dictionary File As..." />
                     <MenuItem mnemonicParsing="false" onAction="#closeMenuAction" text="Close" />

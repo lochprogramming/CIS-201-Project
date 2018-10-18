@@ -27,6 +27,11 @@ public class Entry extends Vocabulary {
       this.sentence = sent;
    }
    
+   public Entry(String word, String pos, String def, String sent) {
+      super(word, pos, def);
+      this.sentence = sent;
+   }
+   
    public void setSentence(String sent) {
       this.sentence = sent;
    }

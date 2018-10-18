@@ -91,7 +91,6 @@ public class MainDisplayController {
          
          //create a data reader task
          AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(file);
-         //bindProgress((DoubleProperty) ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          bindProgress(ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          
          // Add an event handler that triggers when the task completes.
@@ -109,6 +108,7 @@ public class MainDisplayController {
             th.start();
          } catch (Exception e) {
             System.out.println(e);
+            System.out.println("Error creating new thread for anki data reader task.");
          }
          
       } else 
@@ -133,32 +133,76 @@ public class MainDisplayController {
       
       FileDialog fileDialog = new FileDialog(this);
       DictionaryFile file = fileDialog.openDictionaryFile();
+      
       if (file != null) {
-         model.setCurrentFile(file); // sets the current file to the opened one.
-         System.out.println("File chosen successfully.");
+         DictionaryFileReaderTask dictionaryFileReaderTask = new DictionaryFileReaderTask(file);
+         bindProgress(dictionaryFileReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
+         
+         // Add an event handler that triggers when the task completes.
+         dictionaryFileReaderTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+             new EventHandler<WorkerStateEvent>() {
+             @Override
+             public void handle(WorkerStateEvent t) {
+                 addEntryToModel(dictionaryFileReaderTask.getValue()); // adds entries to model
+                 model.setCurrentFile(file); // sets the current file to the opened one.
+                 unbindProgress(); // unbinds the progress property now that the task has completed
+                 System.out.println("Task Finished");
+             }
+         });
+         try {
+            Thread th = new Thread(dictionaryFileReaderTask); // creates a new background thread to run the task on
+            th.setDaemon(true);
+            th.start();
+         } catch (Exception e) {
+            System.out.println(e);
+            System.out.println("Error creating new thread for anki data reader task.");
+         }
       } else 
          System.out.println("File not chosen successfully.");
    }
    
    public void saveAsDictionaryFile() {
-      // Allows the user to create a csv file to save the data in the current model.
-      // Actual file writing not currently implemented.
-      
+      // Allows the user to create a tab delimited text file after choosingg a new save location      
       FileDialog fileDialog = new FileDialog(this);
       DictionaryFile file = fileDialog.saveDictionaryFile();
-      //add some commands for file writing.
-      //create new DictionaryWriter class.
+      
+      if (file != null) {        
+         writeFile(file);
+      } else 
+         System.out.println("File not chosen successfully.");
    }
    
    public void saveDictionaryFile() {
-      // Allows the user to create a csv file to save the data in the current model.
-      // Actual file writing not currently implemented.
+      // Allows the user to create a tab delimited text file overwriting the current file saved in the model
       
       if (model.getCurrentFile() == null)
          saveAsDictionaryFile();
-      
-         //add some commands for file writing.
-         //create new DictionaryWriter class.
+      else
+         writeFile(model.getCurrentFile());
+   }
+   
+   private void writeFile(DictionaryFile file) {
+      // Example of polymorphism.  CSVFireWriterTask takes a File type but we're passing a DictionaryFile subclass type to it.
+      FileWriterTask fileWriterTask = new FileWriterTask(file, model.getDictionaryEntries());
+      bindProgress(fileWriterTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
+         
+      // Add an event handler that triggers when the task completes.
+      fileWriterTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+          new EventHandler<WorkerStateEvent>() {
+          @Override
+          public void handle(WorkerStateEvent t) {  
+             model.setCurrentFile(file); // sets the current file to the written one.
+             unbindProgress(); // unbinds the progress property now that the task has completed
+          }
+      });
+      try {
+         Thread th = new Thread(fileWriterTask); // creates a new background thread to run the task on
+         th.setDaemon(true);
+         th.start();
+      } catch (Exception e) {
+         System.out.println(e);
+         System.out.println("Error creating new thread for file writing task.");
+      }
    }
    
    public void openAboutDialog() {

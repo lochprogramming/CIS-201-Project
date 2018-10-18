@@ -1,30 +1,20 @@
 // **********************************************************************************
-// Title: Major Project: AnkiDataReader
+// Title: Major Project: AnkiDataReaderTask
 // Author: Matthew Lochman
 // Course Section: CIS201-HYB2 (Seidel) Fall 2018
-// File: AnkiDataReader.java
+// File: AnkiDataReaderTask.java
 // Description: Class that reads in vocabulary data from a Anki export file which uses
 //              the subs2srs template
 // **********************************************************************************
 
-// Still needs a quality assurance pass to ensure that if it encounters cards that aren't
-// formatted correctly it doesn't crash.  I've not tested it with cards that aren't in
-// the correct format.
-
 import java.io.BufferedReader;
-//import java.io.BufferedWriter;
-//import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
-//import java.io.OutputStreamWriter;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import javafx.stage.FileChooser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.ArrayList;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.concurrent.Task;
 
 
@@ -109,6 +99,8 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
          
          int count = 0;
          try {
+            // This is a place for recursion to be implemented.
+            
             while (notesContent.length() != 0) {
                int[] flagInfo = nextFlag(notesContent); // grabs info about next flag location
                
@@ -185,7 +177,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    private String parseFurigana(String s) {
       // parses the furigana for the kanji contained in the vocab word
       // parses the string to change the HTML tags surrounding the furigana to brackets: [ and ]
-      
+          
       try{
          boolean flag = false; // got through the string without finding anything needing to be parsed
          while (!flag) {
@@ -339,12 +331,3 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
 
 
 
-//stuff for the file write
-/*
-         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                  new FileOutputStream(new File("WriteTest.txt")), StandardCharsets.UTF_8));
-bw.append("This is a Test\n");
-         bw.newLine();
-         bw.append(s);
-         bw.close();
-*/

@@ -86,6 +86,11 @@ public class MainDisplayView {
    }
    
    @FXML
+   public void openDictionaryFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
+      controller.openDictionaryFile();
+   }
+   
+   @FXML
    public void aboutHelpMenuAction(ActionEvent event) { // triggers the opening of the about dialog from the help menu
       controller.openAboutDialog();
    }

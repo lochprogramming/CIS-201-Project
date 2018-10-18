@@ -34,7 +34,7 @@ public class FileDialog {
       
       FileChooser fileChooser = new FileChooser(); // sets up the file chooser dialog
       fileChooser.setTitle("Open Dictionary File");
-      fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Comma Delimited File (*.csv)", "*.csv"));
+      fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
       return new DictionaryFile(fileChooser.showOpenDialog(controller.getPrimaryStage()));
    }
    
@@ -43,7 +43,7 @@ public class FileDialog {
       
       FileChooser fileChooser = new FileChooser(); // sets up the file chooser dialog
       fileChooser.setTitle("Save Dictionary File");
-      fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Comma Delimited File (*.csv)", "*.csv"));
+      fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
       return new DictionaryFile(fileChooser.showSaveDialog(controller.getPrimaryStage()));
    }
 }

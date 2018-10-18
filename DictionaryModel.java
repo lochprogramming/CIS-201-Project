@@ -48,7 +48,7 @@ public class DictionaryModel {
    }
    
    public void setCurrentFile(DictionaryFile file) {
-      currentFile.setFile(file.getFile());
+      currentFile = file;
       currentFile.setChangedSinceSave(true);
    }
    
