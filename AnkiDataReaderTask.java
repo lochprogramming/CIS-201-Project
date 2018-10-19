@@ -91,23 +91,24 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       int notesIndex = s.indexOf(NOTES_FLAG);
       if (notesIndex != -1) {
          String notesContent = s.substring(notesIndex + NOTES_FLAG.length(), s.lastIndexOf(END_FLAG) + END_FLAG.length());
-         String[] lines = new String[10];
          
-         //initialize the string array
-         for (int i = 0; i < lines.length; i++)
-            lines[i] = "";
+         String[] lines = new String[10];
+         for (int i = 1; i < lines.length; i++)
+               lines[i] = "";
          
          int count = 0;
          try {
             // This is a place for recursion to be implemented.
             
+            // original code from before the new recursive methods were added
+            /*
             while (notesContent.length() != 0) {
                int[] flagInfo = nextFlag(notesContent); // grabs info about next flag location
                
                if (notesContent.indexOf(FURIGANA_FLAG) != -1) // parses the furigana in the word
                   //notesContent = parseFurigana(notesContent); //choose this option to keep furigana
                   notesContent = parseWithoutFurigana(notesContent); // chose this option to remove the furigana.
-               else if (flagInfo[0] == 0) // checks if there was a non-furigana flag and removes it
+               else if (flagInfo[0] == 0) // checks if there was a non-furigana flag at the start and removes it
                   notesContent = notesContent.substring(flagInfo[1]);
                else { // removes the current vocab line and stores it in an array
                    lines[count] = notesContent.substring(0, nextFlag(notesContent)[0]);
@@ -115,6 +116,11 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
                    notesContent = notesContent.substring(nextFlag(notesContent)[0]);
                }
             }
+            */
+                  
+            lines[0] = removeTags(notesContent);
+            lines = separateLines(lines, 1);
+            
          } catch (Exception e) {
             System.out.println("Error in extractVocab");
             System.out.println(notesContent);
@@ -145,9 +151,42 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       return vocab;
    }
    
+   private String removeTags(String s) {
+      // recursive method to remove all the tags (<div> </div> <ruby> and <br />) from a string
+      // puts a \n character between separate words
+      // note: reverses the order the words appeared in the card
+               
+      int[] flagInfo = nextFlag(s); 
+      
+      if (flagInfo[0] == -1)
+         return s; // no tags, so return the string
+      else if (s.indexOf(FURIGANA_FLAG) != -1) // parses the furigana in the word
+         //return removeTags(parseFurigana(s)); //choose this option to keep furigana
+         return removeTags(parseWithoutFurigana(s)); // chose this option to remove the furigana.
+      else if (flagInfo[0] == 0)
+         return removeTags(s.substring(flagInfo[1])); // remove the tag from the front and recursively check for more
+      else
+         return removeTags(s.substring(flagInfo[0]) + "\n" + s.substring(0, flagInfo[0])); // relocate the part in front of the tag to the back
+                                                                                           // and puts a \n character in front of it.
+   }
+   
+   private String[] separateLines(String[] lines, int count) {
+      // recursive method takes a string with separate vocab entries separated by \n characters
+      // splits the entries into a string array
+      // assumes count > 0
+      
+      if (lines[count - 1].indexOf("\n") == -1)
+         return lines;
+      else {
+         lines[count] = lines[count - 1].substring(lines[count - 1].indexOf("\n") + "\n".length());
+         lines[count - 1] = lines[count - 1].substring(0, lines[count - 1].indexOf("\n"));
+         return separateLines(lines, count + 1);
+      } 
+   }
+   
    private int[] nextFlag(String s) {
       // returns an int array
-      // the first entry is the index of the next flag character: <div> </div> <ruby> <br />
+      // the first entry is the index of the next flag character: <div> </div> <br />
       // the second entry is the length of that flag
       
       int[] flagInfo = {-1, 0};
@@ -328,6 +367,4 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       return entries;
    }        
 }
-
-
 
