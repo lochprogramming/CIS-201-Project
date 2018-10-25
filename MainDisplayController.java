@@ -7,7 +7,9 @@
 //              Based on the user request, the controller calls methods in the view
 //              and model to accomplish the requested action.
 // **********************************************************************************
-
+import javafx.collections.FXCollections;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.application.Platform;
 import java.io.File;
 import javafx.stage.Stage;
@@ -84,8 +86,9 @@ public class MainDisplayController {
       
       // File will eventually be chosen by user.  Currently auto loading 
       // an Anki export file to save time testing the program.
-      //File file = new File("Flying Witch__Flying Witch Episode 1.txt");
+      //File file = new File("Flying Witch__Flying Witch Episode 1.txt"); 
       File file = new File("Subs2srs Cards.txt");
+      //File file = new File("testCards.txt");
       if (file != null) {
          System.out.println("File chosen successfully.");
          
@@ -117,12 +120,16 @@ public class MainDisplayController {
    
    public void addEntryToModel(Entry e) {
       // overloaded method to add single entry to data model
-      model.addEntry(e);
+      int[] temp = model.addEntry(e);
+      System.out.println("New Entries: " + temp[0] + " Duplicate entries: " + temp[1]);
+      createEntryAlert(temp);
    }
    
    public void addEntryToModel(ObservableList<Entry> entries) {
       // overloaded method to add multiple entries to data model
-      model.addEntry(entries);
+      int[] temp = model.addEntry(entries);
+      System.out.println("New Entries: " + temp[0] + " Duplicate entries: " + temp[1]);
+      createEntryAlert(temp);
    }
    
    
@@ -193,6 +200,10 @@ public class MainDisplayController {
           public void handle(WorkerStateEvent t) {  
              model.setCurrentFile(file); // sets the current file to the written one.
              unbindProgress(); // unbinds the progress property now that the task has completed
+             
+             // create an alert to inform the user of the successful completion of the file writing
+             Alert alert = new Alert(AlertType.INFORMATION, String.format("%s written successfully.", file));
+             alert.showAndWait();
           }
       });
       try {
@@ -202,7 +213,7 @@ public class MainDisplayController {
       } catch (Exception e) {
          System.out.println(e);
          System.out.println("Error creating new thread for file writing task.");
-      }
+      }     
    }
    
    public void openAboutDialog() {
@@ -227,6 +238,13 @@ public class MainDisplayController {
          e.printStackTrace();
          System.out.println("Error Loading about dialog");
       }
+   }
+   
+   private void createEntryAlert(int[] counts) {
+      // creates a simple alert popup that informs the user of the entries that the system processed.
+      String text = String.format("Total number of entries: %11d.\nNew entries added: %19d.\nDuplicate entries ignored: %10d.\n", counts[0] + counts[1], counts[0], counts[1]);
+      Alert alert = new Alert(AlertType.INFORMATION, text);
+      alert.showAndWait();
    }
    
    public void closeWindow(Stage stage) {

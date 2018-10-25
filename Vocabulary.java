@@ -54,6 +54,25 @@ public class Vocabulary {
       // returns a string formatted as "word - (part of speech) definition"
       return word + " - (" + partOfSpeech + ") " + definition;
    }
+   
+   public boolean equals(Object obj) {
+      // override the equals method for Object to just check if the word and definition matches
+      
+      if (!(obj instanceof Vocabulary))
+         return false;
+      else {
+         if ((this.getWord().equals(((Vocabulary) obj).getWord())) && (this.getDefinition().equals(((Vocabulary) obj).getDefinition())))
+            return true;
+         else 
+            return false;
+      }
+   }
+   
+   public int hashCode() {
+      // return the hashCode of the word
+      
+      return word.hashCode();
+   }
 }
    
    

@@ -35,7 +35,8 @@ public class FileDialog {
       FileChooser fileChooser = new FileChooser(); // sets up the file chooser dialog
       fileChooser.setTitle("Open Dictionary File");
       fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
-      return new DictionaryFile(fileChooser.showOpenDialog(controller.getPrimaryStage()));
+      File file = fileChooser.showOpenDialog(controller.getPrimaryStage());
+      return (file != null) ? new DictionaryFile(file): null;
    }
    
    public DictionaryFile saveDictionaryFile() {
@@ -44,6 +45,7 @@ public class FileDialog {
       FileChooser fileChooser = new FileChooser(); // sets up the file chooser dialog
       fileChooser.setTitle("Save Dictionary File");
       fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text File (*.txt)", "*.txt"));
-      return new DictionaryFile(fileChooser.showSaveDialog(controller.getPrimaryStage()));
+      File file = fileChooser.showSaveDialog(controller.getPrimaryStage());
+      return (file != null) ? new DictionaryFile(file): null;
    }
 }

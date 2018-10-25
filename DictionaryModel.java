@@ -37,14 +37,31 @@ public class DictionaryModel {
       dictionaryEntries.addListener(listener);
    }
    
-   public void addEntry(Entry e) {
+   public int[] addEntry(Entry e) {
       // adds a single entry to the data model
-      dictionaryEntries.add(e);
+      int[] entryCount = {0, 0};
+      if (dictionaryEntries.contains(e)) {
+         entryCount[1]++;
+      } else {
+         entryCount[0]++;
+         dictionaryEntries.add(e);
+      }
+      
+      return entryCount;
    }
    
-   public void addEntry(ObservableList<Entry> entries) {
+   public int[] addEntry(ObservableList<Entry> entries) {
       // adds a collection of entries to the data model
-      dictionaryEntries.addAll(entries);
+      // uses the overloaded addEntry for single entries
+      
+      int[] entryCount = {0, 0};
+      for (int i = 0; i < entries.size(); i++) {
+         int[] tempCount = addEntry(entries.get(i));
+         entryCount[0] += tempCount[0];
+         entryCount[1] += tempCount[1];
+      }
+      
+      return entryCount;
    }
    
    public void setCurrentFile(DictionaryFile file) {

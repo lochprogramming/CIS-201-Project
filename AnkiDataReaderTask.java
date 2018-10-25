@@ -17,7 +17,6 @@ import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import javafx.concurrent.Task;
 
-
 public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    // class that reads in data from an Anki export file.
    
@@ -32,7 +31,6 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    private final String FURIGANA_FLAG = "<ruby>";
    private final String FURIGANA_END_FLAG = "</ruby>";
    private final String LINE_BREAK = "<br />";
-   
    
    public AnkiDataReaderTask(File file) {
       this.ankiFile = file;
@@ -156,7 +154,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       // puts a \n character between separate words
       // note: reverses the order the words appeared in the card
                
-      int[] flagInfo = nextFlag(s); 
+      int[] flagInfo = nextFlag(s);
       
       if (flagInfo[0] == -1)
          return s; // no tags, so return the string
@@ -298,13 +296,25 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
                      vocabStrings[i][2] = lines[i].substring(wordEnd + VOCAB_SEPARATOR.length()).trim();
                } else // this case triggers if the line was only the vocab word. This should never happen in practice
                   vocabStrings[i][0] = lines[i].trim();
-                  
+                    
             } catch (Exception e) {
                System.out.println("Error in splitLines");
                System.out.println("Error in formatting detected.");
                System.out.println(e);
                System.out.println(lines[i]);
             }
+         }
+      }
+      
+      //Iterate through the entries, and if the definition ends with byte -117 in UTF-8 encoding, then remove the last byte.
+      //This is an artifact left over from copying stuff from a website when making the cards.
+      //we need to do this to eliminate duplicates when adding things into the dictionary.
+      
+      for (int i = 0; i < vocabStrings.length; i++) {
+         if (vocabStrings[i][2].length() != 0) {
+            byte[] byteArray = vocabStrings[i][2].getBytes(StandardCharsets.UTF_8);
+            if (byteArray[byteArray.length - 1] == -117)
+               vocabStrings[i][2] = vocabStrings[i][2].substring(0, vocabStrings[i][2].length() - 1);
          }
       }
       
@@ -361,9 +371,9 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       // helper function that creates Entry objects from each of the elements of a Vocabulary list.
       
       ArrayList<Entry> entries = new ArrayList<Entry>();
-      for (int i = 0; i < vocab.size(); i++) {
+      for (int i = 0; i < vocab.size(); i++) 
          entries.add(new Entry(vocab.get(i), expression));
-      }
+      
       return entries;
    }        
 }
