@@ -32,21 +32,23 @@ public class FileWriterTask extends Task<Void>{
       int total = dictionary.size();
       int count = 0;
       
-      BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
-                  new FileOutputStream(file), StandardCharsets.UTF_8));
-                  
-      bw.append("Word" + SEP + "Part of Speech" + SEP + "Definition" + SEP + "Sentence");
-      bw.newLine();
-      
-      // loop through all the entries in the dictionary
-      for (int i = 0; i < total; i++) {
-         bw.write(writeLine(dictionary.get(i))); // write the line for the current entry
-         bw.newLine(); // write a new line character to the buffer
-         bw.flush(); // commit the contents of the buffered writer to the file
-         updateProgress(++count, total); // update the task progress
+      try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+                  new FileOutputStream(file), StandardCharsets.UTF_8))) {
+         // using a try-with-resources that will auto-close the buffered writer when the program is done with the try block.
+         
+         bw.append("Word" + SEP + "Part of Speech" + SEP + "Definition" + SEP + "Sentence");
+         bw.newLine();
+         
+         // loop through all the entries in the dictionary
+         for (int i = 0; i < total; i++) {
+            bw.write(writeLine(dictionary.get(i))); // write the line for the current entry
+            bw.newLine(); // write a new line character to the buffer
+            bw.flush(); // commit the contents of the buffered writer to the file
+            updateProgress(++count, total); // update the task progress
+         }
+      } catch (Exception e) {
+         System.out.println("Error in writing file.");
       }
-      
-      bw.close(); // close the buffered writer
       
       return null;
    }

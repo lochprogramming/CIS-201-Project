@@ -45,8 +45,11 @@ public class DictionaryModel {
       } else {
          entryCount[0]++;
          dictionaryEntries.add(e);
+         
+         if ((currentFile != null) && (!currentFile.isChangedSinceSave()))
+            currentFile.setChangedSinceSave(true); // sets the ChangedSinceSave property to true
       }
-      
+
       return entryCount;
    }
    

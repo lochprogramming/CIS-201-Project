@@ -45,8 +45,8 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       double fileSize = (double) ankiFile.length();
       double totalSizeRead = 0.0;
       
-      try {
-         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(ankiFile), StandardCharsets.UTF_8));
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(ankiFile), StandardCharsets.UTF_8))) {
+         // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
          String s;
          while ((s = br.readLine()) != null) {// reads in one card of data at a time until end of file.
             totalSizeRead += (double) s.getBytes(StandardCharsets.UTF_8).length;
@@ -64,7 +64,6 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
          System.out.println(e);
          System.out.println("Error in reading Anki File");
       }
-      
       
       System.out.println(dictionaryEntries); // print for debugging purposes
       return dictionaryEntries;

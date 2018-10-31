@@ -121,14 +121,12 @@ public class MainDisplayController {
    public void addEntryToModel(Entry e) {
       // overloaded method to add single entry to data model
       int[] temp = model.addEntry(e);
-      System.out.println("New Entries: " + temp[0] + " Duplicate entries: " + temp[1]);
       createEntryAlert(temp);
    }
    
    public void addEntryToModel(ObservableList<Entry> entries) {
       // overloaded method to add multiple entries to data model
       int[] temp = model.addEntry(entries);
-      System.out.println("New Entries: " + temp[0] + " Duplicate entries: " + temp[1]);
       createEntryAlert(temp);
    }
    
@@ -242,7 +240,11 @@ public class MainDisplayController {
    
    private void createEntryAlert(int[] counts) {
       // creates a simple alert popup that informs the user of the entries that the system processed.
-      String text = String.format("Total number of entries: %11d.\nNew entries added: %19d.\nDuplicate entries ignored: %10d.\n", counts[0] + counts[1], counts[0], counts[1]);
+      String total = "Total number of entries:";
+      String newEntries = "New entries added:";
+      String duplicateEntries = "Duplicate entries ignored:";
+      String text = String.format("%-28s%10d.\n%-29s%10d.\n%-28s%10d.\n", total, counts[0] + counts[1], 
+                                       newEntries, counts[0], duplicateEntries, counts[1]);
       Alert alert = new Alert(AlertType.INFORMATION, text);
       alert.showAndWait();
    }
@@ -252,25 +254,9 @@ public class MainDisplayController {
       // Will eventually check to see if there is unsaved data in the data model
       // and if so will prompt the user to save before exiting
       
-      /*
-      // checks to see if there is unsaved information
-      DataIO dataIO = new DataIO(mainController);
-      boolean okToDoAction = false;
-          
-      if (getNeedsSaved()) {
-         String s = dataIO.checkDataSaveState();
-         
-         if (s.equals("Yes"))
-            okToDoAction = dataIO.createFileDialog("Save...");
-         else if (s.equals("No"))
-            okToDoAction = true;
+      if ((model.getCurrentFile() == null) || (!model.getCurrentFile().isChangedSinceSave())) {
+         // trigger a prompt for the user to input whether they want to save, continue without saving, or cancel.
       }
-      else
-         okToDoAction = true;   
-      
-      if (okToDoAction)
-         Platform.exit();
-      */
      
       if (stage == getPrimaryStage())
          Platform.exit(); // closes the main program view and closes the program thread

@@ -33,8 +33,8 @@ public class DictionaryFileReaderTask extends Task<ObservableList<Entry>>{
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
       double fileSize = (double) file.length();
       double totalSizeRead = 0.0;
-      try {
-         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+         // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
          String s = br.readLine(); // consume in the header line in the file
 
          while ((s = br.readLine()) != null) {// reads in one line at a time until end of file.
@@ -60,7 +60,7 @@ public class DictionaryFileReaderTask extends Task<ObservableList<Entry>>{
          System.out.println(e);
          System.out.println("Error in reading dictionary File");
       }
-
+      
       return dictionaryEntries;
    }
 }

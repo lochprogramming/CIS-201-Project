@@ -13,6 +13,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.ObservableList;
@@ -117,6 +120,22 @@ public class MainDisplayView {
    public void initialize() {
       setDefaultColumnSize(); // links the columns to the window width so they stay in the same proportion when the window is resized.
       wordCountLabel.setText("");
+      
+      // setup a row factory to create tooltips for each row in the tableview.
+      // tooltip will display the example sentence
+      vocabTable.setRowFactory(row -> new TableRow<Entry>() {
+         private Tooltip tooltip = new Tooltip();
+         @Override
+         public void updateItem(Entry entry, boolean empty) {
+            super.updateItem(entry, empty);
+            if (empty || entry == null) {
+               setTooltip(null);
+            } else {
+               tooltip.setText("Example sentence: " + entry.getSentence());
+               setTooltip(tooltip);
+            }
+         }
+      });
       
       // initialize the cell factories that will extract the appropriate attributes for each column in the vocabulary table
       wordColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("word"));
