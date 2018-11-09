@@ -140,7 +140,7 @@ public class MainDisplayController {
       DictionaryFile file = fileDialog.openDictionaryFile();
       
       if (file != null) {
-         DictionaryFileReaderTask dictionaryFileReaderTask = new DictionaryFileReaderTask(file);
+         DictionaryFileReaderTask dictionaryFileReaderTask = new DictionaryFileReaderTask(file); // example of polymorphism since this task takes File as argument
          bindProgress(dictionaryFileReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          
          // Add an event handler that triggers when the task completes.
@@ -187,7 +187,7 @@ public class MainDisplayController {
    }
    
    private void writeFile(DictionaryFile file) {
-      // Example of polymorphism.  CSVFireWriterTask takes a File type but we're passing a DictionaryFile subclass type to it.
+      // Example of polymorphism.  FileWriterTask takes a File type but we're passing a DictionaryFile subclass type to it.
       FileWriterTask fileWriterTask = new FileWriterTask(file, model.getDictionaryEntries());
       bindProgress(fileWriterTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          

@@ -22,7 +22,7 @@ public class DictionaryModel {
    private DictionaryFile currentFile;
    
    public DictionaryModel() {
-   
+      //default constructor
    }  
    
    public ObservableList<Entry> getDictionaryEntries() {

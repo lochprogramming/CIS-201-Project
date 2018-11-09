@@ -55,6 +55,7 @@ public class Vocabulary {
       return word + " - (" + partOfSpeech + ") " + definition;
    }
    
+   @Override
    public boolean equals(Object obj) {
       // override the equals method for Object to just check if the word and definition matches
       
@@ -68,6 +69,7 @@ public class Vocabulary {
       }
    }
    
+   @Override
    public int hashCode() {
       // return the hashCode of the word
       

@@ -20,22 +20,25 @@ public class AboutDialogView {
    @FXML
    private Button okButton;
    
-   public MainDisplayController getController() {
-      return controller;
+   public AboutDialogView() {
+      //default constructor
    }
    
-   public void setController(MainDisplayController controller) {
-      this.controller = controller;
+   public MainDisplayController getController() {
+      return controller;
    }
    
    public Stage getAboutDialogViewStage() {
       return aboutDialogViewStage;
    }
    
+   public void setController(MainDisplayController controller) {
+      this.controller = controller;
+   }
+   
    public void setAboutDialogViewStage(Stage stage) {
       this.aboutDialogViewStage = stage;
    }
-   
    
    @FXML
    public void okButtonAction(ActionEvent event) {

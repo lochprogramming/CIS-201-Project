@@ -36,8 +36,8 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       this.ankiFile = file;
    }
    
-   //public ObservableList<Entry> readData() {
-   @Override protected ObservableList<Entry> call() throws Exception {
+   @Override 
+   protected ObservableList<Entry> call() throws Exception {
       // main function that reads vocabulary data out of an Anki export file.
       // calls various helper functions to collect data into an ObservableList which it then 
       // sends back to the controller so it can update the data model.

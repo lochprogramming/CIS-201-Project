@@ -21,19 +21,19 @@ public class DictionaryFileReaderTask extends Task<ObservableList<Entry>>{
    // class that reads in data from an Anki export file.
    
    // Some required objects as well as the string tags used in Anki's export files.
-   private final File file;
+   private final File FILE;
    
    private final static String SEP = "\t";
    
    public DictionaryFileReaderTask(File file) {
-      this.file = file;
+      this.FILE = file;
    }
    
    @Override protected ObservableList<Entry> call() throws Exception {
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
-      double fileSize = (double) file.length();
+      double fileSize = (double) FILE.length();
       double totalSizeRead = 0.0;
-      try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+      try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(FILE), StandardCharsets.UTF_8))) {
          // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
          String s = br.readLine(); // consume in the header line in the file
 
