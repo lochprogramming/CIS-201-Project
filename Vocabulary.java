@@ -58,6 +58,7 @@ public class Vocabulary {
    @Override
    public boolean equals(Object obj) {
       // override the equals method for Object to just check if the word and definition matches
+      // examples of polymorphism
       
       if (!(obj instanceof Vocabulary))
          return false;

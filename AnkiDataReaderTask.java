@@ -16,12 +16,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import javafx.concurrent.Task;
+import java.util.List;
 
 public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
-   // class that reads in data from an Anki export file.
+   // class that reads in data from an Anki export files.
    
    // Some required objects as well as the string tags used in Anki's export files.
-   private final File ankiFile;
+   private final List<File> ankiFiles;
+   private double fileSize;
+   private double totalSizeRead;
    
    private final String EXPRESSION_FLAG = "<div class='expression'>";
    private final String EXPRESSION_BREAK = "&nbsp";
@@ -34,18 +37,38 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    private final String LINE_BREAK = "<br />";
    
    
-   public AnkiDataReaderTask(File file) {
-      this.ankiFile = file;
+   public AnkiDataReaderTask(List<File> files) {
+      fileSize = 0.0;
+      totalSizeRead = 0.0;
+      this.ankiFiles = files;
+      
+      // computes the total file size
+      for (int i = 0; i < ankiFiles.size(); i++)
+         this.fileSize += (double) this.ankiFiles.get(i).length();
    }
    
    @Override 
    protected ObservableList<Entry> call() throws Exception {
-      // main function that reads vocabulary data out of an Anki export file.
+      // main function that reads vocabulary data out of Anki export files.
       // calls various helper functions to collect data into an ObservableList which it then 
       // sends back to the controller so it can update the data model.
+      
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
-      double fileSize = (double) ankiFile.length();
-      double totalSizeRead = 0.0;
+      
+      // function loops through and reads each file
+      for (int i = 0; i < ankiFiles.size(); i++)
+         dictionaryEntries.addAll(readFile(ankiFiles.get(i)));
+      
+      return dictionaryEntries;
+   }
+   
+////////////////////////////////////////////////////////////////////////////////////////
+//Helper functions
+   
+   private ObservableList<Entry> readFile(File ankiFile) {
+      // method that extracts entries from an ankifile
+      
+      ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
       
       try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(ankiFile), StandardCharsets.UTF_8))) {
          // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
@@ -70,9 +93,6 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       System.out.println(dictionaryEntries); // print for debugging purposes
       return dictionaryEntries;
    }
-   
-////////////////////////////////////////////////////////////////////////////////////////
-//Helper functions
   
    private String extractExpression(String s) {
       // helper function that extracts the expression from the current card

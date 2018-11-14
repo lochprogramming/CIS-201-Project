@@ -62,8 +62,8 @@
          <bottom>
             <GridPane prefHeight="26.0" prefWidth="600.0" BorderPane.alignment="CENTER">
               <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="395.5" minWidth="10.0" prefWidth="357.5" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="95.0" />
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="374.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="142.5" minWidth="10.0" prefWidth="142.5" />
               </columnConstraints>
               <rowConstraints>
@@ -71,7 +71,7 @@
               </rowConstraints>
                <children>
                   <Label prefHeight="25.0" prefWidth="105.0" text="   Word Count: " GridPane.halignment="LEFT" GridPane.hgrow="NEVER" />
-                  <Label fx:id="wordCountLabel" prefHeight="25.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                  <Label fx:id="wordCountLabel" prefHeight="25.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" />
                   <ProgressBar fx:id="progressBar" prefHeight="25.0" prefWidth="158.0" progress="0.0" visible="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" />
                </children>
             </GridPane>

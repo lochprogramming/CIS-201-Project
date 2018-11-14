@@ -22,6 +22,7 @@ import javafx.collections.ListChangeListener;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.concurrent.WorkerStateEvent;
+import java.util.List;
 
 public class MainDisplayController {
    // controller for the main program
@@ -81,19 +82,17 @@ public class MainDisplayController {
    }
    
    public void openExportFile() {
-      //FileDialog fileDialog = new FileDialog(this);
-      //File file = fileDialog.openExportFile();
+      FileDialog fileDialog = new FileDialog(this);
+      List<File> files = fileDialog.openExportFile();
       
       // File will eventually be chosen by user.  Currently auto loading 
       // an Anki export file to save time testing the program.
-      //File file = new File("Flying Witch__Flying Witch Episode 1.txt"); 
-      File file = new File("Subs2srs Cards.txt");
-      //File file = new File("testCards.txt");
-      if (file != null) {
+
+      if (files != null) {
          System.out.println("File chosen successfully.");
          
          //create a data reader task
-         AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(file);
+         AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(files);
          bindProgress(ankiDataReaderTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
          
          // Add an event handler that triggers when the task completes.
