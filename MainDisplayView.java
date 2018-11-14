@@ -21,6 +21,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.scene.control.CheckBox;
 
 public class MainDisplayView {
    // the class that makes up the display view
@@ -37,13 +38,16 @@ public class MainDisplayView {
    private TableColumn<Entry, String> partOfSpeechColumn;
 
    @FXML
-   private TableColumn<Entry, String> definitionColumn;
+   private TableColumn<Entry, String> infoColumn;
    
    @FXML
    private Label wordCountLabel;
 
    @FXML
    private ProgressBar progressBar;
+
+   @FXML
+   private CheckBox checkBox;
    
    public MainDisplayView() {
       // default constructor
@@ -117,9 +121,26 @@ public class MainDisplayView {
       wordCountLabel.setText(Integer.toString(count));
    }
    
+   public void setInfoColumn(String text, String property) {
+      // method that changes the display of the Info Column to display the example sentences for the vocabulary
+      // it also switches the mouse-over tooltip to display the definition
+      
+      infoColumn.setText(text);
+      infoColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>(property));
+      
+      vocabTable.refresh(); // refresh the table to update the display/factories
+   }
+   
+   @FXML
+   public void checkBoxAction(ActionEvent event) {
+      // tells the controller that the checkbox has been toggled
+      
+      controller.toggleCheckBox(checkBox.isSelected());
+   }
+   
    public void initialize() {
       setDefaultColumnSize(); // links the columns to the window width so they stay in the same proportion when the window is resized.
-      wordCountLabel.setText("");
+      wordCountLabel.setText("");    
       
       // setup a row factory to create tooltips for each row in the tableview.
       // tooltip will display the example sentence
@@ -131,7 +152,11 @@ public class MainDisplayView {
             if (empty || entry == null) {
                setTooltip(null);
             } else {
-               tooltip.setText("Example sentence: " + entry.getSentence());
+               if (checkBox.isSelected())
+                  tooltip.setText("Definition: " + entry.getDefinition()); 
+               else
+                  tooltip.setText("Example sentence: " + entry.getSentence());
+                  
                setTooltip(tooltip);
             }
          }
@@ -139,7 +164,7 @@ public class MainDisplayView {
       
       // initialize the cell factories that will extract the appropriate attributes for each column in the vocabulary table
       wordColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("word"));
-      partOfSpeechColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("partOfSpeech"));
-      definitionColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("definition"));
+      partOfSpeechColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("partOfSpeech"));   
+      setInfoColumn("Definition", "definition"); // initialize the info column to display the definition
    }
 }

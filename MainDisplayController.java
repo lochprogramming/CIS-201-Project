@@ -249,6 +249,23 @@ public class MainDisplayController {
       alert.showAndWait();
    }
    
+   public void toggleCheckBox(boolean checked) {
+      // instructs the view to change the info column based on the whether the checkbox is toggled. 
+      
+      String text;
+      String property;
+      
+      if (checked) {
+         text = "Example Sentence";
+         property = "sentence";
+      } else {
+         text = "Definition";
+         property = "definition";
+      }
+      
+      view.setInfoColumn(text, property);
+   }
+   
    public void closeWindow(Stage stage) {
       // method called when the user tries to close a portion of the program view
       // Will eventually check to see if there is unsaved data in the data model

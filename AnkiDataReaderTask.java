@@ -24,6 +24,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    private final File ankiFile;
    
    private final String EXPRESSION_FLAG = "<div class='expression'>";
+   private final String EXPRESSION_BREAK = "&nbsp";
    private final String NOTES_FLAG = "<div class='notes'>";
    private final String END_FLAG = "</div>";
    private final String VOCAB_SEPARATOR = " - ";
@@ -31,6 +32,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    private final String FURIGANA_FLAG = "<ruby>";
    private final String FURIGANA_END_FLAG = "</ruby>";
    private final String LINE_BREAK = "<br />";
+   
    
    public AnkiDataReaderTask(File file) {
       this.ankiFile = file;
@@ -78,7 +80,20 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       int expressionIndex = s.indexOf(EXPRESSION_FLAG);
       if (expressionIndex != -1) 
          expression =  s.substring(expressionIndex + EXPRESSION_FLAG.length(), s.indexOf(END_FLAG, expressionIndex));
-      return expression;
+
+      return removeExpressionBreaks(expression);
+   }
+   
+   private String removeExpressionBreaks(String expression) {
+      // recursive implementation to remove some line break artifacts from the expression.
+      
+      int expressionIndex = expression.indexOf(EXPRESSION_BREAK);
+      
+      if (expressionIndex != -1)
+         return removeExpressionBreaks(expression.substring(0, expressionIndex) 
+                                          + expression.substring(expressionIndex + EXPRESSION_BREAK.length()));
+      else
+         return expression;
    }
    
    
