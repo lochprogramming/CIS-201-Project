@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -8,12 +10,14 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainDisplayView">
    <children>
@@ -30,6 +34,13 @@
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                      </columnResizePolicy>
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#deleteContextMenuAction" text="Delete Entry" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu>
                   </TableView>
                </children>
             </AnchorPane>
@@ -60,19 +71,36 @@
             </StackPane>
          </top>
          <bottom>
-            <GridPane prefHeight="26.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+            <GridPane prefHeight="58.0" prefWidth="600.0" BorderPane.alignment="CENTER">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="95.0" minWidth="10.0" prefWidth="95.0" />
                 <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="374.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="142.5" minWidth="10.0" prefWidth="142.5" />
               </columnConstraints>
               <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints maxHeight="29.0" minHeight="29.0" prefHeight="29.0" vgrow="SOMETIMES" />
+                <RowConstraints maxHeight="29.0" minHeight="29.0" prefHeight="29.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                  <Label prefHeight="25.0" prefWidth="105.0" text="   Word Count: " GridPane.halignment="LEFT" GridPane.hgrow="NEVER" />
-                  <Label fx:id="wordCountLabel" prefHeight="25.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" />
-                  <ProgressBar fx:id="progressBar" prefHeight="25.0" prefWidth="158.0" progress="0.0" visible="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" />
+                  <Label prefHeight="25.0" prefWidth="105.0" text="   Word Count: " GridPane.halignment="LEFT" GridPane.hgrow="NEVER" GridPane.rowIndex="1" />
+                  <Label fx:id="wordCountLabel" prefHeight="25.0" prefWidth="202.0" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
+                  <ProgressBar fx:id="progressBar" prefHeight="34.0" prefWidth="139.0" progress="0.0" visible="true" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.hgrow="NEVER" GridPane.rowIndex="1" />
+                  <Label alignment="CENTER" prefHeight="28.0" prefWidth="90.0" text="Search String: " textAlignment="CENTER" />
+                  <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                     <children>
+                        <TextField fx:id="searchTextField" onAction="#searchTrigger" prefHeight="29.0" prefWidth="480.0" promptText="Enter Search Text" />
+                        <Label fx:id="clearSearchLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="27.0" prefWidth="22.0" text="X" visible="false" StackPane.alignment="CENTER_RIGHT">
+                           <font>
+                              <Font name="Arial Black" size="12.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="clearSearchButton" mnemonicParsing="false" onAction="#clearSearchButtonAction" opacity="0.0" prefHeight="29.0" prefWidth="25.0" style="-fx-cursor: hand;" visible="false" StackPane.alignment="CENTER_RIGHT">
+                           <font>
+                              <Font name="Arial Black" size="12.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </StackPane>
                </children>
             </GridPane>
          </bottom>

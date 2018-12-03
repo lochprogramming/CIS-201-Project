@@ -20,12 +20,16 @@ import java.util.List;
 
 public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    // class that reads in data from an Anki export files.
+   // this class defines a task that is meant to be run on a thread separate from the JavaFX thread
    
    // Some required objects as well as the string tags used in Anki's export files.
-   private final List<File> ankiFiles;
+   private final List<File> ANKIFILES;
    private double fileSize;
    private double totalSizeRead;
    
+   // below are various strings uses in the Anki output file (it uses some xml-type coding)
+   // also includes some artifacts from the website the entires were copied from,
+   // some of which are non-printed UTF-8 characters.
    private final String EXPRESSION_FLAG = "<div class='expression'>";
    private final String EXPRESSION_BREAK = "&nbsp";
    private final String NOTES_FLAG = "<div class='notes'>";
@@ -38,13 +42,15 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    
    
    public AnkiDataReaderTask(List<File> files) {
+      // constructor that stores the files to be imported and compiles the total read size for the task
+      // size data is used for the updateProgress task method.
       fileSize = 0.0;
       totalSizeRead = 0.0;
-      this.ankiFiles = files;
+      this.ANKIFILES = files;
       
       // computes the total file size
-      for (int i = 0; i < ankiFiles.size(); i++)
-         this.fileSize += (double) this.ankiFiles.get(i).length();
+      for (int i = 0; i < ANKIFILES.size(); i++)
+         this.fileSize += (double) this.ANKIFILES.get(i).length();
    }
    
    @Override 
@@ -56,8 +62,8 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
       
       // function loops through and reads each file
-      for (int i = 0; i < ankiFiles.size(); i++)
-         dictionaryEntries.addAll(readFile(ankiFiles.get(i)));
+      for (int i = 0; i < ANKIFILES.size(); i++)
+         dictionaryEntries.addAll(readFile(ANKIFILES.get(i)));
       
       return dictionaryEntries;
    }
@@ -70,27 +76,26 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
       
+      // a bufferedreader wrapping an inputstreadreader and a fileinputstream allows the reading of UTF-8 characters
       try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(ankiFile), StandardCharsets.UTF_8))) {
          // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
          String s;
          while ((s = br.readLine()) != null) {// reads in one card of data at a time until end of file.
-            totalSizeRead += (double) s.getBytes(StandardCharsets.UTF_8).length;
+            totalSizeRead += (double) s.getBytes(StandardCharsets.UTF_8).length; // determined how big the current line is
             updateProgress(totalSizeRead, fileSize); // updates the tasks progress with value totalSizeRead / fileSize
-
-            String expression = new String(extractExpression(s)); // calls function to extract the expression data
-                                                                  // this is the sentence the vocabulary is used in
-                                                                  
-            ArrayList<Vocabulary> vocab = extractVocab(s); // calls function to extract an arraylist of Vocabulary from the card
             
-            ArrayList<Entry> entries = createEntries(vocab, expression); // calls function to create Entry objects from the Vocabulary
-            dictionaryEntries.addAll(entries); // calls function that adds the entries to the ObservableList   
+            // calls extractExpression to extract the expression data this is the sentence the vocabulary is used in                                                              
+            // calls extractVocab to extract an arraylist of Vocabulary from the card
+            // calls createEntries to create Entry objects from the Vocabulary
+            ArrayList<Entry> entries = createEntries(extractVocab(s), extractExpression(s));   
+                      
+            dictionaryEntries.addAll(entries); // adds the entries to the ObservableList   
          }
       } catch (Exception e) {
          System.out.println(e);
          System.out.println("Error in reading Anki File");
       }
       
-      System.out.println(dictionaryEntries); // print for debugging purposes
       return dictionaryEntries;
    }
   
@@ -106,6 +111,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    
    private String removeExpressionBreaks(String expression) {
       // recursive implementation to remove some line break artifacts from the expression.
+      // EXPRESSION_BREAK is an html artifact from copying the information off an online dictionary
       
       int expressionIndex = expression.indexOf(EXPRESSION_BREAK);
       
@@ -118,66 +124,41 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    
    
    private ArrayList<Vocabulary> extractVocab(String s) {
+      // method that extracts each vocabulary word from the card and makes an arraylist from them.
+      // utilizes a recursive method to break down the initial string 
+      // removing vocabulary information one at a time until it is empty.
+      
       ArrayList<Vocabulary> vocab = new ArrayList<Vocabulary>();
       
+      // vocabulary is contained in the notes section of the anki card data.
       int notesIndex = s.indexOf(NOTES_FLAG);
       if (notesIndex != -1) {
+         // removes the text between the notes flags. 
          String notesContent = s.substring(notesIndex + NOTES_FLAG.length(), s.lastIndexOf(END_FLAG) + END_FLAG.length());
          
+         // initializes a one-dimentional string array to hold the individual vocabulary text as they're pulled out.
          String[] lines = new String[10];
          for (int i = 1; i < lines.length; i++)
                lines[i] = "";
          
          int count = 0;
-         try {
-            // This is a place for recursion to be implemented.
-            
-            // original code from before the new recursive methods were added
-            /*
-            while (notesContent.length() != 0) {
-               int[] flagInfo = nextFlag(notesContent); // grabs info about next flag location
-               
-               if (notesContent.indexOf(FURIGANA_FLAG) != -1) // parses the furigana in the word
-                  //notesContent = parseFurigana(notesContent); //choose this option to keep furigana
-                  notesContent = parseWithoutFurigana(notesContent); // chose this option to remove the furigana.
-               else if (flagInfo[0] == 0) // checks if there was a non-furigana flag at the start and removes it
-                  notesContent = notesContent.substring(flagInfo[1]);
-               else { // removes the current vocab line and stores it in an array
-                   lines[count] = notesContent.substring(0, nextFlag(notesContent)[0]);
-                   count++;
-                   notesContent = notesContent.substring(nextFlag(notesContent)[0]);
-               }
-            }
-            */
-                  
-            lines[0] = removeTags(notesContent);
-            lines = separateLines(lines, 1);
-            
+         try {             
+            // cleans the notes content of tags and inserts /n characters between different vocabulary entries
+            // stores the cleaned content in the first element of the string array.
+            lines[0] = removeTags(notesContent); 
+            separateLines(lines, 1); // splits the individual vocabulary entries and propogates them to the rest of the array elements
          } catch (Exception e) {
             System.out.println("Error in extractVocab");
             System.out.println(notesContent);
          }
          
-         
          String[][] vocabStrings = splitLines(lines); // split the lines into word, part of speech, definition
-                                                      // and store result in an array
-         
+                                                      // and store result in a two-dimensional array
          
          // loop through the array and create new vocabulary from all the non-empty entries
          for (int i = 0; i < vocabStrings.length; i++) 
             if (vocabStrings[i][0].length() != 0)
-               vocab.add(new Vocabulary(vocabStrings[i][0], vocabStrings[i][1], vocabStrings[i][2]));
-               
-         /*
-         // old lines for calling the convertToVocabulary method
-         // originally, the programmed created Vocabulary one entry at a time
-         // replaced to force inclusion of 2D arrays
-         // I haven't tested which method is more efficient, but I feel like this one is better
-         for (int i = 0; i < lines.length; i++) 
-            if (lines[i].length() != 0) 
-               vocab.add(convertToVocabulary(lines[i]));
-         */      
-         
+               vocab.add(new Vocabulary(vocabStrings[i][0], vocabStrings[i][1], vocabStrings[i][2]));     
       }
       
       return vocab;
@@ -185,14 +166,14 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
    
    private String removeTags(String s) {
       // recursive method to remove all the tags (<div> </div> <ruby> and <br />) from a string
-      // puts a \n character between separate words
-      // note: reverses the order the words appeared in the card
+      // puts a \n character between separate vocabulary entries
+      // note: reverses the order the vocabulary entries appeared in the card
                
-      int[] flagInfo = nextFlag(s);
+      int[] flagInfo = nextFlag(s); // grabs the index and length of the next flag character in the string
       
       if (flagInfo[0] == -1)
          return s; // no tags, so return the string
-      else if (s.indexOf(FURIGANA_FLAG) != -1) // parses the furigana in the word
+      else if (s.indexOf(FURIGANA_FLAG) != -1)  // parses out the furigana in the word
          //return removeTags(parseFurigana(s)); //choose this option to keep furigana
          return removeTags(parseWithoutFurigana(s)); // chose this option to remove the furigana.
       else if (flagInfo[0] == 0)
@@ -207,6 +188,10 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       // splits the entries into a string array
       // assumes count > 0
       
+      // Takes the string in the index before count and checks to see if there is a \n character,
+      // which indicates that there are multiple vocabulary in that line still.
+      // If there is, it pulls out everything after the \n and stores it in the count index.
+      // Then it replaces the entry in the count-1 index with everything before the \n character.
       if (lines[count - 1].indexOf("\n") == -1)
          return lines;
       else {
@@ -354,53 +339,7 @@ public class AnkiDataReaderTask extends Task<ObservableList<Entry>>{
       
       return vocabStrings;
    }
-   
-   
-   // original methods that are a little more elegant in my opinion.
-   // deactivated to force to use of multi-dimensional arrays
-   /*
-   private Vocabulary convertToVocabulary(String line) {
-      // helper function that takes a line of text containing vocab information for a single word
-      // and converts it into a new Vocabulary object.
-     
-      String word = "", partOfSpeech = "", definition = "";
-      // strips aparts text lines in the following formats:
-      // word - (part of speech) definition
-      // word - definition
       
-      int wordEnd = line.indexOf(VOCAB_SEPARATOR); // find the separator string " - " that 
-                                                   // separates the words from the rest of the entry
-      try {                                             
-         if (wordEnd != -1) { // there was a word separator
-            word = line.substring(0, wordEnd);
-            int posStart = line.indexOf(VOCAB_SEPARATOR + "("); // find the start of the part of speech
-            
-            if (posStart != -1) { // there was a part of speech included
-               int defStart = line.indexOf(")", posStart); // find the start of the definition
-                     
-               if (defStart != 1) { // checking to make sure the ) was present.  If not, then there is an error in the formatting.
-                  partOfSpeech = line.substring(posStart + (VOCAB_SEPARATOR + "(").length(), defStart).trim();
-                  definition = line.substring(defStart + 1).trim();
-               } else {
-                  System.out.println("Error in splitLines");
-                  System.out.println("No ending ) with part of speech detected");
-                  System.out.println(line);
-               }
-            } else // there was no part of speech, so the rest is just the definition
-               definition = line.substring(wordEnd + VOCAB_SEPARATOR.length()).trim();
-         } else // this case triggers if the line was only the vocab word. This should never happen in practice
-            word = line.trim();
-            
-      } catch (Exception e) {
-         System.out.println("Error in convertToVocabulary");
-         System.out.println(e);
-         System.out.println(line);
-      }
-
-      return new Vocabulary(word, partOfSpeech, definition);
-   }
-   */
-   
    private ArrayList<Entry> createEntries(ArrayList<Vocabulary> vocab, String expression) {
       // helper function that creates Entry objects from each of the elements of a Vocabulary list.
       

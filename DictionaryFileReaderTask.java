@@ -18,21 +18,28 @@ import javafx.concurrent.Task;
 
 
 public class DictionaryFileReaderTask extends Task<ObservableList<Entry>>{
-   // class that reads in data from an Anki export file.
+   // class defines a task that is used to open a previous saved dicitonary file made by the program
+   // task is meant to be run on a thread separate from the JavaFX thread
+   // there is verification to check if the file was indeed a file made by the program.
+   
+   // the file is a tab-separated text file
+   private final static String SEP = "\t";
    
    // Some required objects as well as the string tags used in Anki's export files.
    private final File FILE;
-   
-   private final static String SEP = "\t";
    
    public DictionaryFileReaderTask(File file) {
       this.FILE = file;
    }
    
    @Override protected ObservableList<Entry> call() throws Exception {
+      // method will read in the vocabulary entries and update the task progress
+      
       ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
       double fileSize = (double) FILE.length();
       double totalSizeRead = 0.0;
+      
+      // a bufferedreader wrapping an inputstreadreader and a fileinputstream allows the reading of UTF-8 characters
       try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(FILE), StandardCharsets.UTF_8))) {
          // using a try-with-resources that will auto-close the buffered reader when the program is done with the try block.
          String s = br.readLine(); // consume in the header line in the file
@@ -41,6 +48,7 @@ public class DictionaryFileReaderTask extends Task<ObservableList<Entry>>{
             totalSizeRead += (double) s.getBytes(StandardCharsets.UTF_8).length;
             updateProgress(totalSizeRead, fileSize); // updates the tasks progress with value totalSizeRead / fileSize
             
+            // creates a string array to store the word, part of speech, definition, and example sentence
             String[] line = new String[4];
             int count = 0;
             do {

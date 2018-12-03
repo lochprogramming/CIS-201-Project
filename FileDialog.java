@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 
 public class FileDialog {
    // this class manages file choosing dialogs. 
+   // has methods to create file choice dialogs for Open Anki File, Save, Save As, and Open
    
    MainDisplayController controller;
    File currentDirectory;
@@ -24,12 +25,14 @@ public class FileDialog {
    }
    
    private void findCurrentDirectory() throws URISyntaxException {
+      // method that attempts to retrieve the folder containing the MainDisplayController class file
       currentDirectory = new File(
                MainDisplayController.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
    }
    
    public List<File> openExportFile() {
-      //method which lets the user choose the export file from Anki that they wish to extract from.
+      // method which lets the user choose the export file from Anki that they wish to extract from.
+      // allows for multiple files to be chosen at once.
       try {
          findCurrentDirectory();
       } catch (URISyntaxException e) {

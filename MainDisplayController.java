@@ -10,6 +10,8 @@
 import javafx.collections.FXCollections;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
 import javafx.application.Platform;
 import java.io.File;
 import javafx.stage.Stage;
@@ -23,6 +25,7 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.concurrent.WorkerStateEvent;
 import java.util.List;
+import javafx.event.ActionEvent;
 
 public class MainDisplayController {
    // controller for the main program
@@ -33,10 +36,20 @@ public class MainDisplayController {
    private Stage primaryStage; //For referencing the main window
    
    public MainDisplayController(MainDisplayView view, DictionaryModel model) {
+      // constructor stores current view and model
+      // registers the controller with the view
+      // links the table in the view to the model and binds the conparator properties
+      // to ensure that clicking on the columns in the table will sort the model data
+      // adds a listener to the model to update the disctionary word count in the view
+      // whenever the data is changed. 
       this.view = view;
       this.model = model;
       view.setController(this);
-      view.setTable(model.getDictionaryEntries());
+      view.setTable(model.getSearchResultEntries());
+      
+      //Bind the comparator properties of the tableview to the sortedlist in the model 
+      //to ensure that the filtered data is sorted when the user clicks on one of the column headings.
+      model.getSortedListComparatorProperty().bind(view.getTableComparatorProperty());
       
       //Add a Listener to the model's data list that checks to see if it has been changed.
       //If so, it will update the word count in the display.
@@ -44,7 +57,11 @@ public class MainDisplayController {
       model.addListener(new ListChangeListener<Entry>() {
          @Override
          public void onChanged(Change<? extends Entry> c) {
-            view.setWordCount(model.getDictionarySize());
+            if (model.isFiltered()) {
+               view.setWordCount(model.getSearchResultSize() + " (" + model.getDictionarySize() + ")");
+            } else {
+               view.setWordCount(Integer.toString(model.getDictionarySize()));
+            }
          }
       });
    }
@@ -74,22 +91,25 @@ public class MainDisplayController {
    }
    
    public void bindProgress(ReadOnlyDoubleProperty d) {
+      // binds a double value to the progress bar in the UI
       view.bindProgressBar(d);
    }
    
    public void unbindProgress() {
+      // unbinds a double value from the progress bar in the UI
       view.unbindProgressBar();
    }
    
    public void openExportFile() {
+      // method for opening an Anki export file. 
+      // method will trigger an open multiple file dialog
+      // then creates a task that reads in each file on a background thread
+      // task progress is bound to the progress bar in the UI
+      
       FileDialog fileDialog = new FileDialog(this);
       List<File> files = fileDialog.openExportFile();
-      
-      // File will eventually be chosen by user.  Currently auto loading 
-      // an Anki export file to save time testing the program.
 
       if (files != null) {
-         System.out.println("File chosen successfully.");
          
          //create a data reader task
          AnkiDataReaderTask ankiDataReaderTask = new AnkiDataReaderTask(files);
@@ -117,23 +137,37 @@ public class MainDisplayController {
          System.out.println("File not chosen successfully.");
    }
    
-   public void addEntryToModel(Entry e) {
-      // overloaded method to add single entry to data model
-      int[] temp = model.addEntry(e);
-      createEntryAlert(temp);
-   }
-   
    public void addEntryToModel(ObservableList<Entry> entries) {
-      // overloaded method to add multiple entries to data model
+      // method to add multiple entries to data model
       int[] temp = model.addEntry(entries);
-      createEntryAlert(temp);
+      view.searchTrigger(new ActionEvent()); // trigger an update of the displayed list to include the new entries.
+      createEntryAlert(temp); // create alert dialog that tells the user how many entries were added.
    }
    
+   public void removeEntryFromModel(Entry e) {
+      // method to delete an entry from the data model.
+      model.removeEntry(e);
+      view.searchTrigger(new ActionEvent()); // trigger an update of the displayed list to delete the removed entries.
+   }
+   
+   public void searchDataModel(String searchString) {
+      // method to filter the data model based on a search string
+      
+      model.setSearchString(searchString);
+   }
+   
+   public void clearSearch() {
+      // method that clears the search
+      
+      view.setSearchText("");
+      view.searchTrigger(new ActionEvent());
+   }
    
    public void openDictionaryFile() {
       // Allows the user to choose a previously saved dictionary file.
-      // Currently doesn't do anything else except update the file name in the model
-      // Will eventually load data into the current model
+      // Once the user chooses a file via a file open dialog, method creates a task
+      // that will read in the data and update the model
+      // A background thread is created to run this task
       
       FileDialog fileDialog = new FileDialog(this);
       DictionaryFile file = fileDialog.openDictionaryFile();
@@ -166,7 +200,9 @@ public class MainDisplayController {
    }
    
    public void saveAsDictionaryFile() {
-      // Allows the user to create a tab delimited text file after choosingg a new save location      
+      // opens a save as dialog for the user to save the data currently in the model
+      // Writes a tab-delimited file with a simple header
+           
       FileDialog fileDialog = new FileDialog(this);
       DictionaryFile file = fileDialog.saveDictionaryFile();
       
@@ -178,6 +214,7 @@ public class MainDisplayController {
    
    public void saveDictionaryFile() {
       // Allows the user to create a tab delimited text file overwriting the current file saved in the model
+      // triggers a save as dialog if the user hasn't saved the data previously
       
       if (model.getCurrentFile() == null)
          saveAsDictionaryFile();
@@ -186,6 +223,9 @@ public class MainDisplayController {
    }
    
    private void writeFile(DictionaryFile file) {
+      // method creates a task to write the current model data to a tab-delimited file
+      // task is run on a background thread and progress is bound to the progress bar in the UI
+      
       // Example of polymorphism.  FileWriterTask takes a File type but we're passing a DictionaryFile subclass type to it.
       FileWriterTask fileWriterTask = new FileWriterTask(file, model.getDictionaryEntries());
       bindProgress(fileWriterTask.progressProperty()); // bind the tasks progress property to the progress bar in the UI
@@ -228,7 +268,7 @@ public class MainDisplayController {
          newWindow.show(); //make window visible
          newWindow.centerOnScreen(); //center window
        
-         AboutDialogView aboutDialogView = aboutDialogLoader.getController(); // creates an instance of the aboutdialogview and stores the one just loaded
+         AboutDialogView aboutDialogView = aboutDialogLoader.getController(); // stores the aboutDialogView just loaded by FXML
          aboutDialogView.setAboutDialogViewStage(newWindow); // passes the Stage to it so it can be closed.
          aboutDialogView.setController(this);
       } catch (IOException e) {
@@ -248,8 +288,19 @@ public class MainDisplayController {
       alert.showAndWait();
    }
    
+   private Optional<ButtonType> createCloseWithoutSaveAlert() {
+      // method creates an alert to inform the user when they are trying to close the program
+      // with unsaved changes to the model
+      
+      Alert alert = new Alert(AlertType.CONFIRMATION, "You have unsaved changes. Do you want to save the changes you made first?", 
+         ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+      alert.setTitle("Save Changes?");
+      return alert.showAndWait();
+   }
+   
    public void toggleCheckBox(boolean checked) {
       // instructs the view to change the info column based on the whether the checkbox is toggled. 
+      // changes the info column in the table between the definition and example sentence for all entries
       
       String text;
       String property;
@@ -267,15 +318,24 @@ public class MainDisplayController {
    
    public void closeWindow(Stage stage) {
       // method called when the user tries to close a portion of the program view
-      // Will eventually check to see if there is unsaved data in the data model
-      // and if so will prompt the user to save before exiting
-      
-      if ((model.getCurrentFile() == null) || (!model.getCurrentFile().isChangedSinceSave())) {
-         // trigger a prompt for the user to input whether they want to save, continue without saving, or cancel.
-      }
+      // if closing the main window, a check is made to see whether the user has unsaved changes.
      
-      if (stage == getPrimaryStage())
+      if (stage == getPrimaryStage()) {
+         if ((model.getDictionarySize() != 0) && ((model.getCurrentFile() == null) || (!model.getCurrentFile().isChangedSinceSave()))) {
+            // trigger a prompt for the user to input whether they want to save, continue without saving, or cancel.
+            
+            Optional<ButtonType> result = createCloseWithoutSaveAlert(); // gets user decision from pop-up alert
+            if (result.isPresent() && result.get() == ButtonType.YES) {
+               // if the user says yes, trigger the save file dialog
+               saveDictionaryFile();
+               return; // returns out of the method without closing
+            } else if (result.isPresent() && result.get() == ButtonType.CANCEL) {
+               // if the user says cancel, returns out of the method without closing.
+               return;
+            }
+         }
          Platform.exit(); // closes the main program view and closes the program thread
+      }
       else
          stage.close(); // closes a child window.
    }

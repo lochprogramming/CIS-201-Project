@@ -10,6 +10,7 @@
 public class Vocabulary {
    // class for the vocabulary data structure
    
+   // vocabular consists of three attributes
    private String word;
    private String partOfSpeech;
    private String definition;
@@ -50,11 +51,13 @@ public class Vocabulary {
       return definition;
    }
    
+   @Override
    public String toString() {
       // returns a string formatted as "word - (part of speech) definition"
       return word + " - (" + partOfSpeech + ") " + definition;
    }
    
+   // the following two methods are used to test for duplicates
    @Override
    public boolean equals(Object obj) {
       // override the equals method for Object to just check if the word and definition matches

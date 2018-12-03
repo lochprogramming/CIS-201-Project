@@ -28,26 +28,11 @@ public class DictionaryFile extends File{
       this.changedSinceSave = new SimpleBooleanProperty(false);
    }
    
-   /*
-   public void setFile(File file) {
-      this.file = file;
-   }
-   */
-   
    public void setChangedSinceSave(boolean changed) {
       this.changedSinceSave.set(changed);
    }
    
-   /*
-   public File getFile() {
-      return this.file;
-   }
-   */
-   
    public boolean isChangedSinceSave() {
       return changedSinceSave.get();
-   }
-   public SimpleBooleanProperty getChangedSinceSaveProperty() {
-      return changedSinceSave;
    }
 }

@@ -13,23 +13,12 @@ import javafx.event.ActionEvent;
 
 public class AboutDialogView {
    
-   //Button.  Used to grab stage in next method.
+   
    private Stage aboutDialogViewStage;
    private MainDisplayController controller;
    
-   @FXML
-   private Button okButton;
-   
    public AboutDialogView() {
       //default constructor
-   }
-   
-   public MainDisplayController getController() {
-      return controller;
-   }
-   
-   public Stage getAboutDialogViewStage() {
-      return aboutDialogViewStage;
    }
    
    public void setController(MainDisplayController controller) {
@@ -42,6 +31,7 @@ public class AboutDialogView {
    
    @FXML
    public void okButtonAction(ActionEvent event) {
+      // button handler that asks the main controller to close the AboutDialogWindow
       controller.closeWindow(aboutDialogViewStage);
    }
 }

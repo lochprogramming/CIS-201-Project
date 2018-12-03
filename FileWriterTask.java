@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import javafx.concurrent.Task;
 
 public class FileWriterTask extends Task<Void>{
+   // class defines a task that will write all the dictionary entries in the program to a tab-delimited text file
+   // task is designed to be run on a thread separate from teh JavaFX thread.
 
    private final File FILE;
    private final ObservableList<Entry> DICTIONARY;
@@ -27,7 +29,10 @@ public class FileWriterTask extends Task<Void>{
       this.DICTIONARY = dictionary;
    }
    
-   @Override protected Void call() throws Exception {
+   @Override 
+   protected Void call() throws Exception {
+      // Method writes a tab-delimited file with a simple header line
+      // Updates it's progress with enties written/total number of entries
       int total = DICTIONARY.size();
       int count = 0;
       

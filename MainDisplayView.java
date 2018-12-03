@@ -22,11 +22,27 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ProgressBar;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import java.awt.event.KeyEvent;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.Cursor;
+import javafx.scene.control.Label;
+import java.util.Comparator;
+import javafx.beans.property.ReadOnlyObjectProperty;
+
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class MainDisplayView {
    // the class that makes up the display view
+   // contains handler methods that are triggered by the user interfacing with the UI
    
    private MainDisplayController controller;
+   private StringStack searchTextStack = new StringStack();
+   
       
    @FXML
    private TableView<Entry> vocabTable;
@@ -49,16 +65,23 @@ public class MainDisplayView {
    @FXML
    private CheckBox checkBox;
    
+   @FXML
+   private TextField searchTextField;
+
+   @FXML
+   private Button clearSearchButton;
+   
+   @FXML
+   private Label clearSearchLabel;
+   
    public MainDisplayView() {
       // default constructor
    }
    
+   // allows the controller to be registered with this instance of the display view. 
+   // needed since the display view is being loaded by FXML
    public void setController(MainDisplayController c) {
       this.controller = c;
-   }
-   
-   public MainDisplayController getController() {
-      return controller;
    }
    
    public void bindProgressBar(ReadOnlyDoubleProperty d) {
@@ -68,6 +91,10 @@ public class MainDisplayView {
    public void unbindProgressBar() {
       progressBar.progressProperty().unbind();
       progressBar.progressProperty().set(0.0);
+   }
+   
+   public ReadOnlyObjectProperty<Comparator<Entry>> getTableComparatorProperty() {
+      return vocabTable.comparatorProperty();
    }
    
    private void setDefaultColumnSize() {
@@ -83,33 +110,51 @@ public class MainDisplayView {
    }
    
    @FXML
-   public void closeMenuAction(ActionEvent event) { //Closes the program if the exit option is selected from the File menu.
+   private void closeMenuAction(ActionEvent event) { //Closes the program if the exit option is selected from the File menu.
       controller.closeWindow(controller.getPrimaryStage());
    }
    
    @FXML
-   public void openExportFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
+   private void openExportFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
       controller.openExportFile();
    }
    
    @FXML
-   public void openDictionaryFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
+   private void openDictionaryFileMenuAction(ActionEvent event) { // triggers an open file dialog for choosing an Anki export file
       controller.openDictionaryFile();
    }
    
    @FXML
-   public void aboutHelpMenuAction(ActionEvent event) { // triggers the opening of the about dialog from the help menu
+   private void aboutHelpMenuAction(ActionEvent event) { // triggers the opening of the about dialog from the help menu
       controller.openAboutDialog();
    }
    
    @FXML
-   public void saveMenuAction(ActionEvent event) { // triggers the save feature of the file menu
+   private void saveMenuAction(ActionEvent event) { // triggers the save feature of the file menu
       controller.saveDictionaryFile();
    }
    
    @FXML
-   public void saveAsMenuAction(ActionEvent event) { // triggers the save as feature of the file menu
+   private void saveAsMenuAction(ActionEvent event) { // triggers the save as feature of the file menu
       controller.saveAsDictionaryFile();
+   }
+   
+   @FXML
+   private void deleteContextMenuAction(ActionEvent event) {// the delete option in the right-click context menu used by the tableview
+      controller.removeEntryFromModel(vocabTable.getSelectionModel().getSelectedItem());
+   }
+   
+   @FXML
+   public void searchTrigger(ActionEvent event) { 
+      // triggers the filtering of the data if the user presses the enter key while focued on the textfield
+      
+      controller.searchDataModel(searchTextField.getText());
+      refreshTable();
+   }
+   
+   public void refreshTable() {
+      // method that forces a refresh for the tableview
+      vocabTable.refresh();
    }
    
    public void setTable(ObservableList<Entry> vocabList) {
@@ -117,8 +162,8 @@ public class MainDisplayView {
       vocabTable.setItems(vocabList);
    }
    
-   public void setWordCount(int count) {
-      wordCountLabel.setText(Integer.toString(count));
+   public void setWordCount(String s) {
+      wordCountLabel.setText(s);
    }
    
    public void setInfoColumn(String text, String property) {
@@ -128,7 +173,7 @@ public class MainDisplayView {
       infoColumn.setText(text);
       infoColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>(property));
       
-      vocabTable.refresh(); // refresh the table to update the display/factories
+      refreshTable(); // refresh the table to update the display/factories
    }
    
    @FXML
@@ -138,7 +183,22 @@ public class MainDisplayView {
       controller.toggleCheckBox(checkBox.isSelected());
    }
    
+   public void setSearchText(String s) {
+      searchTextField.setText(s);
+   }
+   
+   @FXML
+   private void clearSearchButtonAction(ActionEvent event) {
+      controller.clearSearch();
+   }
+   
    public void initialize() {
+      // method that sets up the table view and links some of the parts of the UI together
+      // fixes the column widths to the window dimensions
+      // sets row and cell factories to link the table to the data model
+      // sets up a listener to include the clear button on the search text field when something has been typed there
+      // sets up a listener to automatically trigger a search if the user starts typing in the search bar and then stops for 1 second.
+      
       setDefaultColumnSize(); // links the columns to the window width so they stay in the same proportion when the window is resized.
       wordCountLabel.setText("");    
       
@@ -166,5 +226,38 @@ public class MainDisplayView {
       wordColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("word"));
       partOfSpeechColumn.setCellValueFactory(new PropertyValueFactory<Entry, String>("partOfSpeech"));   
       setInfoColumn("Definition", "definition"); // initialize the info column to display the definition
+      
+      // listener to have an x mark at the end of the search bar when there is text that can be cleared out
+      // makes the x appear as well as an invisible button that has a cursor change effect.  
+      // clicking the botton clears the text in the search box.
+      searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+          if (newValue.equals("")) {
+             clearSearchLabel.setVisible(false);
+             clearSearchButton.setVisible(false);
+          } else {
+             clearSearchLabel.setVisible(true);    
+             clearSearchButton.setVisible(true);
+          }
+      });
+      
+      // listener that triggers a search if there's been a 1 second wait between new text being entered in the search box
+      // each time a character is typed, the text in the search bar is put on top of the textstack 
+      // and a pausetransition is created with a 1 second duration.
+      // After the second is up, the transition checks to see if the current text in the search bar 
+      // matches the text on top of the stack (in other words the user stopped typing)
+      // if it doesn't the pause transition fizzles, otherwise it triggers a search
+      searchTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+          searchTextStack.push(searchTextField.getText());
+          
+          PauseTransition pause = new PauseTransition(Duration.seconds(1));
+          pause.setOnFinished(event -> {
+            if (searchTextField.getText().equals(searchTextStack.peek())) {
+               searchTrigger(new ActionEvent());
+               searchTextStack.clearStack();
+            }     
+          });
+          pause.playFromStart();
+      });
+     
    }
 }

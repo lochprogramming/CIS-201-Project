@@ -13,28 +13,73 @@
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.File;
-import java.util.Comparator;
 import javafx.collections.ListChangeListener;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList; 
+import java.util.Comparator;
+import javafx.beans.property.ObjectProperty;
 
 public class DictionaryModel {
    // dictionary data model class
    private ObservableList<Entry> dictionaryEntries = FXCollections.observableArrayList();
    private DictionaryFile currentFile;
+   private FilteredList<Entry> filteredDictionaryEntries = new FilteredList<Entry> (dictionaryEntries, Entry.entrySearchFilter(""));
+   
+   // model uses a SortedList to wrap the FilteredList to allow it to be changed since FilteredList is unmodifiable.
+   // in particular, the FilteredList cannot be sorted when a user tries to sort a TableView by clicking on column headings
+   // So wrapping it in a SortedList fixes this.  
+   private SortedList<Entry> searchResultEntries = new SortedList<Entry> (filteredDictionaryEntries);
+   
    
    public DictionaryModel() {
       //default constructor
    }  
+  
+//////////////////////////////////////////////////////////////////////////////////////
+// accessor methods
+   
+   public DictionaryFile getCurrentFile() {
+      return currentFile;
+   }
    
    public ObservableList<Entry> getDictionaryEntries() {
       return dictionaryEntries;
+   }
+   
+   public SortedList<Entry> getSearchResultEntries() {
+      return searchResultEntries;
    }
    
    public int getDictionarySize() {
       return dictionaryEntries.size();
    }
    
+   public int getSearchResultSize() {
+      return filteredDictionaryEntries.size();
+   }
+   
+   public ObjectProperty<Comparator<? super Entry>> getSortedListComparatorProperty() {
+      return searchResultEntries.comparatorProperty();
+   }
+   
+   public boolean isFiltered() {
+      return (dictionaryEntries.size() != filteredDictionaryEntries.size());
+   }
+   
+///////////////////////////////////////////////////////////////////////////////////////////
+// mutator methods
+   
+   public void setCurrentFile(DictionaryFile file) {
+      currentFile = file;
+      currentFile.setChangedSinceSave(true);
+   }
+
+   public void setSearchString(String searchString) {
+      filteredDictionaryEntries.setPredicate(Entry.entrySearchFilter(searchString));
+   }
+   
    public void addListener(ListChangeListener<Entry> listener) {
-      dictionaryEntries.addListener(listener);
+      filteredDictionaryEntries.addListener(listener);
    }
    
    public int[] addEntry(Entry e) {
@@ -67,18 +112,11 @@ public class DictionaryModel {
       return entryCount;
    }
    
-   public void setCurrentFile(DictionaryFile file) {
-      currentFile = file;
-      currentFile.setChangedSinceSave(true);
-   }
-   
-   public void sortList() {
-      // method that will sort the dictionary entry list based on the word.
-      Comparator<Entry> comparator = Comparator.comparing(Entry::getWord);
-      FXCollections.sort(dictionaryEntries, comparator);
-   }
-   
-   public DictionaryFile getCurrentFile() {
-      return currentFile;
+   public void removeEntry(Entry e) {
+      // method for removing an entry from the model
+      dictionaryEntries.remove(e);
+      
+      if ((currentFile != null) && (!currentFile.isChangedSinceSave()))
+         currentFile.setChangedSinceSave(true); // sets the ChangedSinceSave property to true
    }
 }
