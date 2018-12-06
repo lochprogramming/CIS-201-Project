@@ -10,6 +10,7 @@
 // **********************************************************************************
 
 import javafx.fxml.FXML;
+import javafx.stage.Stage;
 import javafx.scene.control.TableView;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TableColumn;
@@ -80,8 +81,12 @@ public class MainDisplayView {
    
    // allows the controller to be registered with this instance of the display view. 
    // needed since the display view is being loaded by FXML
-   public void setController(MainDisplayController c) {
-      this.controller = c;
+   public MainDisplayController getController() {
+      return controller;
+   }
+   
+   public Stage getPrimaryStage() {
+      return ((Stage) checkBox.getScene().getWindow());
    }
    
    public void bindProgressBar(ReadOnlyDoubleProperty d) {
@@ -193,11 +198,14 @@ public class MainDisplayView {
    }
    
    public void initialize() {
-      // method that sets up the table view and links some of the parts of the UI together
+      // method that instantiates the view controller, sets up the table view, and links some of the parts of the UI together
       // fixes the column widths to the window dimensions
       // sets row and cell factories to link the table to the data model
       // sets up a listener to include the clear button on the search text field when something has been typed there
       // sets up a listener to automatically trigger a search if the user starts typing in the search bar and then stops for 1 second.
+      
+      // get the primary stage from one of the control objects.
+      controller = new MainDisplayController(this);
       
       setDefaultColumnSize(); // links the columns to the window width so they stay in the same proportion when the window is resized.
       wordCountLabel.setText("");    

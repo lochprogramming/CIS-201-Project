@@ -33,9 +33,8 @@ public class MainDisplayController {
    
    private MainDisplayView view; // current program view visible to user
    private DictionaryModel model; // current instance of the dictionary data model
-   private Stage primaryStage; //For referencing the main window
    
-   public MainDisplayController(MainDisplayView view, DictionaryModel model) {
+   public MainDisplayController(MainDisplayView view) {
       // constructor stores current view and model
       // registers the controller with the view
       // links the table in the view to the model and binds the conparator properties
@@ -43,8 +42,8 @@ public class MainDisplayController {
       // adds a listener to the model to update the disctionary word count in the view
       // whenever the data is changed. 
       this.view = view;
-      this.model = model;
-      view.setController(this);
+      this.model = new DictionaryModel();
+      
       view.setTable(model.getSearchResultEntries());
       
       //Bind the comparator properties of the tableview to the sortedlist in the model 
@@ -66,18 +65,6 @@ public class MainDisplayController {
       });
    }
    
-   public void setPrimaryStage(Stage stage) {
-      this.primaryStage = stage;
-   }
-   
-   public void setModel(DictionaryModel model) {
-      this.model = model;
-   }
-   
-   public void setView(MainDisplayView view) {
-      this.view = view;
-   }
-   
    public DictionaryModel getModel() {
       return model;
    }
@@ -87,7 +74,7 @@ public class MainDisplayController {
    }
    
    public Stage getPrimaryStage() {
-      return this.primaryStage;
+      return view.getPrimaryStage();
    }
    
    public void bindProgress(ReadOnlyDoubleProperty d) {
@@ -255,7 +242,7 @@ public class MainDisplayController {
    
    public void openAboutDialog() {
       // Opens a new window to display the About Dialog
-      
+               
       try{
          FXMLLoader aboutDialogLoader = new FXMLLoader(getClass().getResource("AboutDialogView.fxml"));
          // Sets up the scene from the MainDisplayView for when program initially starts
@@ -263,7 +250,7 @@ public class MainDisplayController {
          Stage newWindow = new Stage(); // create a new window
          newWindow.setTitle("About Anki Vocabulary Extractor"); // sets the window title
          newWindow.setScene(scene); //sets the scene diplayed in the window
-         newWindow.initOwner(primaryStage); // set owner to main window
+         newWindow.initOwner(view.getPrimaryStage()); // set owner to main window
          newWindow.initModality(Modality.WINDOW_MODAL); // can't click on main window while dialog is open
          newWindow.show(); //make window visible
          newWindow.centerOnScreen(); //center window
