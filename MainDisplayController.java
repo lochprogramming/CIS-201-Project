@@ -32,7 +32,7 @@ public class MainDisplayController {
    // interacts with the main display view and the dictionary model
    
    private MainDisplayView view; // current program view visible to user
-   private DictionaryModel model; // current instance of the dictionary data model
+   private DictionaryModel model= new DictionaryModel(); // current instance of the dictionary data model  
    
    public MainDisplayController(MainDisplayView view) {
       // constructor stores current view and model
@@ -42,7 +42,6 @@ public class MainDisplayController {
       // adds a listener to the model to update the disctionary word count in the view
       // whenever the data is changed. 
       this.view = view;
-      this.model = new DictionaryModel();
       
       view.setTable(model.getSearchResultEntries());
       
